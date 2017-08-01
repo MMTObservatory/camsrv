@@ -33,7 +33,7 @@ metadata = dict(conf.items('metadata'))
 PACKAGENAME = metadata.get('package_name', 'matcam')
 DESCRIPTION = metadata.get('description', 'Web interface to Mount Alignment Telescope camera, MATcam')
 AUTHOR = metadata.get('author', 'T. E. Pickering')
-AUTHOR_EMAIL = metadata.get('author_email', '')
+AUTHOR_EMAIL = metadata.get('author_email', 'te.pickering@gmail.com')
 LICENSE = metadata.get('license', 'unknown')
 URL = metadata.get('url', 'https://github.com/MMTObservatory/MATcam')
 
