@@ -35,9 +35,11 @@ class MATServ(tornado.web.Application):
             self.render("js9.html")
 
     def __init__(self):
-        parent = Path(__file__).parent
-        template_path = parent / ".." / "templates"
-        static_path = parent / ".." / "js9"
+        parent = Path(__file__).parent / ".."
+        template_path = parent / "templates"
+        static_path = parent / "static"
+        js9_path = parent / "js9"
+        bootstrap_path = parent / "bootstrap"
 
         settings = dict(
             template_path=template_path,
@@ -47,14 +49,16 @@ class MATServ(tornado.web.Application):
 
         handlers = [
             (r"/", self.HomeHandler),
-            (r"/js9Prefs\.json", tornado.web.RedirectHandler, dict(url="/static/js9Prefs.json")),
-            (r"/js9\.min\.js", tornado.web.RedirectHandler, dict(url="/static/js9.min.js")),
-            (r"/js9worker\.js", tornado.web.RedirectHandler, dict(url="/static/js9worker.js")),
-            (r"/images/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "images")),
-            (r"/help/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "help")),
-            (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "plugins")),
-            (r"/params/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "params")),
-            (r"/analysis-plugins/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "analysis-plugins")),
+            (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
+            (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
+            (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
+            (r"/js9\.min\.js", tornado.web.StaticFileHandler, dict(path=js9_path / "js9.min.js")),
+            (r"/js9worker\.js", tornado.web.StaticFileHandler, dict(path=js9_path / "js9worker.js")),
+            (r"/images/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "images")),
+            (r"/help/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "help")),
+            (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "plugins")),
+            (r"/params/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "params")),
+            (r"/analysis-plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "analysis-plugins")),
         ]
 
         super(MATServ, self).__init__(handlers, **settings)
