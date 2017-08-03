@@ -50,11 +50,11 @@ class MATServ(tornado.web.Application):
             (r"/js9Prefs\.json", tornado.web.RedirectHandler, dict(url="/static/js9Prefs.json")),
             (r"/js9\.min\.js", tornado.web.RedirectHandler, dict(url="/static/js9.min.js")),
             (r"/js9worker\.js", tornado.web.RedirectHandler, dict(url="/static/js9worker.js")),
-            (r"/images/", tornado.web.RedirectHandler, dict(url="/static/images/")),
-            (r"/help/", tornado.web.RedirectHandler, dict(url="/static/help/")),
-            (r"/plugins/", tornado.web.RedirectHandler, dict(url="/static/plugins/")),
-            (r"/params/", tornado.web.RedirectHandler, dict(url="/static/params/")),
-            (r"/analysis-plugins", tornado.web.RedirectHandler, dict(url="/static/analysis-plugins")),
+            (r"/images/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "images")),
+            (r"/help/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "help")),
+            (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "plugins")),
+            (r"/params/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "params")),
+            (r"/analysis-plugins/(.*)", tornado.web.StaticFileHandler, dict(path=static_path / "analysis-plugins")),
         ]
 
         super(MATServ, self).__init__(handlers, **settings)
