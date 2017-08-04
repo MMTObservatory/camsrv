@@ -22,6 +22,10 @@ enable_pretty_logging()
 
 from pathlib import Path
 
+import pyds9
+
+from sbigclient.sbigcam import CCDCam
+
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
@@ -40,6 +44,9 @@ class MATServ(tornado.web.Application):
         static_path = parent / "static"
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
+
+        #self.camera = CCDCam(host="localhost", port=7624)
+        self.js9 = pyds9.JS9()
 
         settings = dict(
             template_path=template_path,
