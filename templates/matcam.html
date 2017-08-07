@@ -24,7 +24,7 @@
           right: 0;
           bottom: 0;
           left: 0;
-          width: 512px;
+          width: 768px;
           height: 512px;
       }
     </style>
@@ -36,17 +36,11 @@
     </div>
 
     <div id="centerdiv">
-    <div class="JS9Menubar"></div>
-    <div class="JS9"></div>
-    <div style="margin-top: 2px;"><div class="JS9Colorbar"></div></div>
+    <div class="JS9Menubar" data-width="768px"></div>
+    <div class="JS9" data-width="768px" data-height="512px"></div>
+    <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="768px"></div></div>
     </div>
-    <script type="text/javascript">
-      $(document).ready(function(){
-          $("#centerdiv").draggable({
-            handle: "#JS9Menubar"
-          });
-      });
-    </script>
+
 <p>
 </body>
 </html>
