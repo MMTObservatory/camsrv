@@ -27,6 +27,9 @@
           width: 768px;
           height: 512px;
       }
+      .form-inline label {
+          margin-left: 10px;
+      }
     </style>
     <title>MMTO Mount Alignment Telescope</title>
 </head>
@@ -36,11 +39,65 @@
     </div>
 
     <div id="centerdiv">
-    <div class="JS9Menubar" data-width="768px"></div>
-    <div class="JS9" data-width="768px" data-height="512px"></div>
-    <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="768px"></div></div>
+
+        <p>
+            <div class="row">
+                <div class='col-lg-9'>
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label for="filter">Filter:</label>
+                            <select class="form-control" id="filter">
+                                {% for f in args['filters'] %}
+                                    {% if f == args['filter'] %}
+                                        <option selected value={{ f }}>{{ f }}</option>
+                                    {% else %}
+                                        <option value={{ f }}>{{ f }}</option>
+                                    {% end %}
+                                {% end %}
+                            </select>
+                            <label for="exptype">Exposure Type:</label>
+                            <select class="form-control" id="exptype">
+                                {% for f in args['frame_types'] %}
+                                    {% if f == 'Light' %}
+                                        <option selected value={{ f }}>{{ f }}</option>
+                                    {% else %}
+                                        <option value={{ f }}>{{ f }}</option>
+                                    {% end %}
+                                {% end %}
+                            </select>
+                            <label for="exptime">Exposure Time (sec):</label>
+                            <input type="number" min=0.0 max=3600.0 step=0.1 value=1.0 id="exptime">
+                        </div>
+                    </form>
+                </div>
+                <div class='col-lg-3'>
+                    <span class="input-group-btn">
+                        <button type="button" id="expose" class="btn btn-primary">Expose</button>
+                    </span>
+                </div>
+                <script>
+                    $('#expose').on('click', function() {
+                        $('#expose').prop("disabled", true)
+                        var exptype = $('#exptype').val();
+                        var exptime = $('#exptime').val();
+                        var filt = $('#filter').val();
+                        var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
+                        $.get(url, function(data, status) {
+                            var logstuff = data + status;
+                            $('#expose').prop("disabled", false)
+                        });
+                        JS9.CloseImage();
+                        JS9.Load("latest");
+                    });
+                </script>
+            </div>
+        </p>
+        <p>
+            <div class="JS9Menubar" data-width="768px"></div>
+            <div class="JS9" data-width="768px" data-height="512px"></div>
+            <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="768px"></div>
+        </p>
     </div>
 
-<p>
 </body>
 </html>
