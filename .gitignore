@@ -61,3 +61,6 @@ distribute-*.tar.gz
 
 # JS9 helper build files
 js9helper
+
+# FITS data
+fitsdata
