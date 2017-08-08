@@ -3,6 +3,7 @@ MMTO Mount Aligment Telescope interface
 """
 
 import os
+import io
 
 import logging
 import logging.handlers
@@ -22,8 +23,6 @@ enable_pretty_logging()
 
 from pathlib import Path
 
-import pyjs9
-
 from sbigclient.sbigcam import CCDCam
 
 log = logging.getLogger('tornado.application')
@@ -36,7 +35,41 @@ class MATServ(tornado.web.Application):
         Serves the main HTML page.
         """
         def get(self):
-            self.render("js9.html")
+            args = {
+                'filter': self.application.camera.filter,
+                'filters': self.application.camera.filters,
+                'frame_types': self.application.camera.frame_types,
+            }
+            self.render("matcam.html", args=args)
+
+    class ExposureHandler(tornado.web.RequestHandler):
+        """
+        Takes an exposure
+        """
+        def get(self):
+            cam = self.application.camera
+            exptype = self.get_argument('exptype', default="Light")
+            filt = self.get_argument('filt', default=None)
+            exptime = self.get_argument('exptime', default=1.0)
+
+            if filt is not None and filt in cam.filters:
+                cam.filter = filt
+
+            if exptype not in cam.frame_types:
+                exptype = "Light"
+
+            self.application.latest_image = cam.expose(exptime=float(exptime), exptype=exptype)[0]
+
+    class LatestHandler(tornado.web.RequestHandler):
+        """
+        Serve up the latest image
+        """
+        def get(self):
+            if self.application.latest_image is not None:
+                binout = io.BytesIO()
+                self.application.latest_image.writeto(binout)
+                self.write(binout.getvalue())
+                binout.close()
 
     def __init__(self):
         parent = Path(__file__).parent / ".."
@@ -45,8 +78,8 @@ class MATServ(tornado.web.Application):
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
 
-        #self.camera = CCDCam(host="localhost", port=7624)
-        #self.js9 = pyjs9.JS9()
+        self.camera = CCDCam(host="localhost", port=7624)
+        self.latest_image = None
 
         settings = dict(
             template_path=template_path,
@@ -56,6 +89,8 @@ class MATServ(tornado.web.Application):
 
         handlers = [
             (r"/", self.HomeHandler),
+            (r"/expose", self.ExposureHandler),
+            (r"/latest", self.LatestHandler),
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
@@ -66,6 +101,7 @@ class MATServ(tornado.web.Application):
             (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "plugins")),
             (r"/params/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "params")),
             (r"/analysis-plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "analysis-plugins")),
+            (r"/fits/(.*)", tornado.web.StaticFileHandler, dict(path=parent / "fitsdata")),
         ]
 
         super(MATServ, self).__init__(handlers, **settings)
