@@ -4,6 +4,7 @@ MMTO Mount Aligment Telescope interface
 
 import os
 import io
+import socket
 
 import logging
 import logging.handlers
@@ -35,11 +36,18 @@ class MATServ(tornado.web.Application):
         Serves the main HTML page.
         """
         def get(self):
-            args = {
-                'filter': self.application.camera.filter,
-                'filters': self.application.camera.filters,
-                'frame_types': self.application.camera.frame_types,
-            }
+            if self.application.camera is not None:
+                args = {
+                    'filter': self.application.camera.filter,
+                    'filters': self.application.camera.filters,
+                    'frame_types': self.application.camera.frame_types,
+                }
+            else:
+                args = {
+                    'filter': "N/A",
+                    'filters': ["N/A"],
+                    'frame_types': ["N/A"]
+                }
             self.render("matcam.html", args=args)
 
     class ExposureHandler(tornado.web.RequestHandler):
@@ -52,13 +60,20 @@ class MATServ(tornado.web.Application):
             filt = self.get_argument('filt', default=None)
             exptime = self.get_argument('exptime', default=1.0)
 
-            if filt is not None and filt in cam.filters:
-                cam.filter = filt
+            if cam is not None:
+                if filt is not None and filt in cam.filters:
+                    cam.filter = filt
 
-            if exptype not in cam.frame_types:
-                exptype = "Light"
+                if exptype not in cam.frame_types:
+                    exptype = "Light"
 
-            self.application.latest_image = cam.expose(exptime=float(exptime), exptype=exptype)[0]
+                hdulist = cam.expose(exptime=float(exptime), exptype=exptype)
+                if hdulist is not None:
+                    self.application.latest_image = hdulist[0]
+                else:
+                    log.error("Exposure failed.")
+            else:
+                log.warning("Camera not connected.")
 
     class LatestHandler(tornado.web.RequestHandler):
         """
@@ -66,6 +81,7 @@ class MATServ(tornado.web.Application):
         """
         def get(self):
             if self.application.latest_image is not None:
+                # use io.BytesIO to convert the FITS data structure into a byte stream
                 binout = io.BytesIO()
                 self.application.latest_image.writeto(binout)
                 self.write(binout.getvalue())
@@ -78,7 +94,20 @@ class MATServ(tornado.web.Application):
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
 
-        self.camera = CCDCam(host="localhost", port=7624)
+        self.camera = None
+
+        try:
+            self.camera = CCDCam(host="matcam", port=7624)
+        except (ConnectionRefusedError, socket.gaierror):
+            log.warning("Can't connect to matcam host. Falling back to test server...")
+
+        if self.camera is None:
+            try:
+                self.camera = CCDCam(host="localhost", port=7624)
+            except (ConnectionRefusedError, socket.gaierror):
+                self.camera = None
+                log.error("Connection refused to local test server as well...")
+
         self.latest_image = None
 
         settings = dict(
