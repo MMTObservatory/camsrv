@@ -24,7 +24,7 @@ enable_pretty_logging()
 
 from pathlib import Path
 
-from sbigclient.sbigcam import CCDCam
+from sbigclient.sbigcam import CCDCam, MATCam
 
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
@@ -87,6 +87,32 @@ class MATServ(tornado.web.Application):
                 self.write(binout.getvalue())
                 binout.close()
 
+    class ResetHandler(tornado.web.RequestHandler):
+        """
+        Reset or start up the connection to the camera's INDI server.
+        """
+        def get(self):
+            cam = self.application.camera
+            if cam is None:
+                self.application.connect_camera()
+            else:
+                cam.reset_connection()
+
+    def connect_camera(self):
+        # check the actual camera
+        try:
+            self.camera = MATCam(host="matcam", port=7624)
+            self.camera.driver = "SBIG CCD"
+        except (ConnectionRefusedError, socket.gaierror):
+            log.warning("Can't connect to matcam host. Falling back to test server...")
+
+        # fall back to the test simulator server
+        if self.camera is None:
+            try:
+                self.camera = CCDCam(host="localhost", port=7624)
+            except (ConnectionRefusedError, socket.gaierror):
+                log.error("Connection refused to local test server as well...")
+
     def __init__(self):
         parent = Path(__file__).parent / ".."
         template_path = parent / "templates"
@@ -96,17 +122,7 @@ class MATServ(tornado.web.Application):
 
         self.camera = None
 
-        try:
-            self.camera = CCDCam(host="matcam", port=7624)
-        except (ConnectionRefusedError, socket.gaierror):
-            log.warning("Can't connect to matcam host. Falling back to test server...")
-
-        if self.camera is None:
-            try:
-                self.camera = CCDCam(host="localhost", port=7624)
-            except (ConnectionRefusedError, socket.gaierror):
-                self.camera = None
-                log.error("Connection refused to local test server as well...")
+        self.connect_camera()
 
         self.latest_image = None
 
