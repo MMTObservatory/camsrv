@@ -5,6 +5,7 @@ MMTO Mount Aligment Telescope interface
 import os
 import io
 import socket
+import json
 
 import logging
 import logging.handlers
@@ -41,12 +42,22 @@ class MATServ(tornado.web.Application):
                     'filter': self.application.camera.filter,
                     'filters': self.application.camera.filters,
                     'frame_types': self.application.camera.frame_types,
+                    'cooling': self.application.camera.cooler,
+                    'temperature': self.application.camera.temperature,
+                    'cooling_power': self.application.camera.cooling_power,
+                    'requested_temp': self.application.requested_temp,
+                    'status': True,
                 }
             else:
                 args = {
                     'filter': "N/A",
                     'filters': ["N/A"],
-                    'frame_types': ["N/A"]
+                    'frame_types': ["N/A"],
+                    'cooling': "Off",
+                    'temperature': "N/A",
+                    'cooling_power': "N/A",
+                    'requested_temp': self.application.requested_temp,
+                    'status': False,
                 }
             self.render("matcam.html", args=args)
 
@@ -94,9 +105,85 @@ class MATServ(tornado.web.Application):
         def get(self):
             cam = self.application.camera
             if cam is None:
+                log.info("Attemping to connect to camera...")
                 self.application.connect_camera()
             else:
-                cam.reset_connection()
+                try:
+                    cam.reset_connection()
+                except Exception as e:
+                    log.error("Error resetting camera connection: %s" % e)
+                    cam = None
+                    self.application.connect_camera()
+
+    class CoolingHandler(tornado.web.RequestHandler):
+        """
+        Toggle CCD cooler on/off
+        """
+        def get(self):
+            cam = self.application.camera
+            if cam is not None:
+                if cam.cooler == "Off":
+                    log.info("Cooling off, turning on...")
+                    cam.cooling_on()
+                else:
+                    log.info("Cooling on, turning off...")
+                    cam.cooling_off()
+
+    class TemperatureHandler(tornado.web.RequestHandler):
+        """
+        Set the set-point temperature of the CCD cooler
+        """
+        def get(self):
+            cam = self.application.camera
+            temp = self.get_argument('temp', None)
+            if temp is not None and cam is not None:
+                t = float(temp)
+                log.info("Setting set-point temperature to %f" % t)
+                self.application.requested_temp = t
+                cam.temperature = t
+            else:
+                log.warning("Unable to set camera temperature to %s" % temp)
+
+    class StatusHandler(tornado.web.RequestHandler):
+        """
+        Send JSON dict of status information
+        """
+        def get(self):
+            cam = self.application.camera
+            status = {
+                'cooling': "Off",
+                'cooling_power': "N/A",
+                'temperature': "N/A",
+                'requested_temp': self.application.requested_temp,
+                'status': False,
+            }
+
+            # make sure we can connect to camera and bail early if we can't
+            if cam is not None:
+                try:
+                    connected = cam.connected
+                except Exception as e:
+                    log.error("Error checking camera connection: %s" % e)
+                    cam = None
+                    self.write(json.dumps(status))
+                    return
+
+            # we can check the connection and if we're connected, then query camera and fill in the status
+            if cam.connected:
+                # don't always get the cooling power
+                try:
+                    cooling_power = "%.1f" % cam.cooling_power
+                except:
+                    cooling_power = "N/A"
+
+                status = {
+                    'cooling': cam.cooler,
+                    'cooling_power': cooling_power,
+                    'temperature': "%.1f" % cam.temperature,
+                    'requested_temp': self.application.requested_temp,
+                    'status': True,
+                }
+            self.write(json.dumps(status))
 
     def connect_camera(self):
         # check the actual camera
@@ -125,6 +212,7 @@ class MATServ(tornado.web.Application):
         self.connect_camera()
 
         self.latest_image = None
+        self.requested_temp = -15.0
 
         settings = dict(
             template_path=template_path,
@@ -136,6 +224,10 @@ class MATServ(tornado.web.Application):
             (r"/", self.HomeHandler),
             (r"/expose", self.ExposureHandler),
             (r"/latest", self.LatestHandler),
+            (r"/cooling", self.CoolingHandler),
+            (r"/reset", self.ResetHandler),
+            (r"/status", self.StatusHandler),
+            (r"/temperature", self.TemperatureHandler),
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
