@@ -112,15 +112,24 @@
                 </div>
             </div>
             <script>
+                var busy = false;
                 $('#expose').on('click', function() {
+                    $('#connect').prop("disabled", true);
                     $('#expose').prop("disabled", true);
+                    $('#cooling').prop("disabled", true);
+                    $('#conftemp').prop("disabled", true);
+                    busy = true;
                     var exptype = $('#exptype').val();
                     var exptime = $('#exptime').val();
                     var filt = $('#filter').val();
                     var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
                     $.get(url, function(data, status) {
                         var logstuff = data + status;
+                        $('#connect').prop("disabled", false);
                         $('#expose').prop("disabled", false);
+                        $('#cooling').prop("disabled", false);
+                        $('#conftemp').prop("disabled", false);
+                        busy = false;
                     });
                     JS9.CloseImage();
                     JS9.Load("latest");
@@ -139,6 +148,7 @@
                     });
                 });
                 $('#connect').on('click', function(){
+                    busy = true;
                     $('#connect').prop("disabled", true);
                     $('#expose').prop("disabled", true);
                     $('#cooling').prop("disabled", true);
@@ -149,24 +159,27 @@
                         $('#expose').prop("disabled", false);
                         $('#cooling').prop("disabled", false);
                         $('#conftemp').prop("disabled", false);
+                        busy = false;
                     });
                 });
 
                 (function update() {
                     $.getJSON("status", {format: "json"}).done(function(data) {
-                        $('#ctemp').html(data['temperature'] + " ˚C");
-                        $('#cpower').html(data['cooling_power'] + "%");
-                        if (data['cooling'] == "On") {
-                            $('#cooling').prop('checked', true);
-                        } else {
-                            $('#cooling').prop('checked', false);
-                        };
-                        if (data['status'] == true) {
-                            $("#connect").removeClass("btn-danger");
-                            $("#connect").addClass("btn-success");
-                        } else {
-                            $("#connect").removeClass("btn-success");
-                            $("#connect").addClass("btn-danger");
+                        if (busy == false) {
+                            $('#ctemp').html(data['temperature'] + " ˚C");
+                            $('#cpower').html(data['cooling_power'] + "%");
+                            if (data['cooling'] == "On") {
+                                $('#cooling').prop('checked', true);
+                            } else {
+                                $('#cooling').prop('checked', false);
+                            };
+                            if (data['status'] == true) {
+                                $("#connect").removeClass("btn-danger");
+                                $("#connect").addClass("btn-success");
+                            } else {
+                                $("#connect").removeClass("btn-success");
+                                $("#connect").addClass("btn-danger");
+                            };
                         };
                         setTimeout(update, 5000);
                     });
