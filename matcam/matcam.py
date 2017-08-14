@@ -109,7 +109,13 @@ class MATServ(tornado.web.Application):
                 self.application.connect_camera()
             else:
                 try:
+                    log.info("Disconnecting camera...")
+                    cam.disconnect()
+                    log.info("Resetting INDI network connection...")
                     cam.reset_connection()
+                    log.info("Reconnecting camera...")
+                    cam.connect()
+                    cam.tell()
                 except Exception as e:
                     log.error("Error resetting camera connection: %s" % e)
                     cam = None

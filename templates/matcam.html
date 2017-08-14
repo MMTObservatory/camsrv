@@ -113,7 +113,7 @@
             </div>
             <script>
                 $('#expose').on('click', function() {
-                    $('#expose').prop("disabled", true)
+                    $('#expose').prop("disabled", true);
                     var exptype = $('#exptype').val();
                     var exptime = $('#exptime').val();
                     var filt = $('#filter').val();
@@ -139,8 +139,16 @@
                     });
                 });
                 $('#connect').on('click', function(){
+                    $('#connect').prop("disabled", true);
+                    $('#expose').prop("disabled", true);
+                    $('#cooling').prop("disabled", true);
+                    $('#conftemp').prop("disabled", true);
                     $.get("reset", function(data, status) {
                         var logstuff = data + status;
+                        $('#connect').prop("disabled", false);
+                        $('#expose').prop("disabled", false);
+                        $('#cooling').prop("disabled", false);
+                        $('#conftemp').prop("disabled", false);
                     });
                 });
 
@@ -152,6 +160,13 @@
                             $('#cooling').prop('checked', true);
                         } else {
                             $('#cooling').prop('checked', false);
+                        };
+                        if (data['status'] == true) {
+                            $("#connect").removeClass("btn-danger");
+                            $("#connect").addClass("btn-success");
+                        } else {
+                            $("#connect").removeClass("btn-success");
+                            $("#connect").addClass("btn-danger");
                         };
                         setTimeout(update, 5000);
                     });
