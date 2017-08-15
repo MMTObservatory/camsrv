@@ -9,8 +9,9 @@
     <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
     <link rel="apple-touch-icon" href="/images/js9-apple-touch-icon.png">
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/popper.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js9/js9support.min.js"></script>
     <script type="text/javascript" src="js9/js9.min.js"></script>
     <script type="text/javascript" src="js9/js9plugins.js"></script>
@@ -113,6 +114,9 @@
             </div>
             <script>
                 var busy = false;
+                x = 500.;
+                y = 500.;
+                radius = 20.;
                 $('#expose').on('click', function() {
                     $('#connect').prop("disabled", true);
                     $('#expose').prop("disabled", true);
@@ -131,8 +135,19 @@
                         $('#conftemp').prop("disabled", false);
                         busy = false;
                     });
+                    rarr = JS9.GetRegions();
+                    if (rarr != null) {
+                        if (rarr.length > 0) {
+                            reg = rarr[0];
+                            x = reg['x'];
+                            y = reg['y'];
+                            radius = reg['radius'];
+                        };
+                    };
                     JS9.CloseImage();
-                    JS9.Load("latest");
+                    JS9.Load("latest", {onload: function() {
+                        JS9.AddRegions("circle", {x: x, y: y, radius: radius});
+                    }});
                 });
                 $('#cooling').on('click', function() {
                     $.get("cooling", function(data, status) {
