@@ -6,6 +6,7 @@ import os
 import io
 import socket
 import json
+import time
 
 import logging
 import logging.handlers
@@ -112,10 +113,15 @@ class MATServ(tornado.web.Application):
                     log.info("Disconnecting camera...")
                     cam.disconnect()
                     log.info("Resetting INDI network connection...")
-                    cam.reset_connection()
-                    log.info("Reconnecting camera...")
+                    t = time.time()
+                    # give reset 10 sec to work or raise a TimeoutError
+                    while True:
+                        cam.reset_connection()
+                        log.info("Reconnecting camera...")
+                        if (time.time() - t) > 10.0:
+                            raise TimeoutError("Resetting camera connection timed out.")
                     cam.connect()
-                    cam.tell()
+                    log.info("Camera reconnected.")
                 except Exception as e:
                     log.error("Error resetting camera connection: %s" % e)
                     cam = None
