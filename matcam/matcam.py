@@ -112,19 +112,10 @@ class MATServ(tornado.web.Application):
                 try:
                     log.info("Disconnecting camera...")
                     cam.disconnect()
-                    log.info("Resetting INDI network connection...")
-                    t = time.time()
-                    # give reset 10 sec to work or raise a TimeoutError
-                    while True:
-                        cam.reset_connection()
-                        log.info("Reconnecting camera...")
-                        if (time.time() - t) > 10.0:
-                            raise TimeoutError("Resetting camera connection timed out.")
-                    cam.connect()
-                    log.info("Camera reconnected.")
                 except Exception as e:
                     log.error("Error resetting camera connection: %s" % e)
                     cam = None
+                finally:
                     self.application.connect_camera()
 
     class CoolingHandler(tornado.web.RequestHandler):
@@ -199,6 +190,7 @@ class MATServ(tornado.web.Application):
 
     def connect_camera(self):
         # check the actual camera
+        self.camera = None
         try:
             self.camera = MATCam(host="matcam", port=7624)
             self.camera.driver = "SBIG CCD"
