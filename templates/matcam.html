@@ -145,11 +145,15 @@
                         };
                     };
                     cmap = JS9.GetColormap();
+                    scale = JS9.GetScale();
                     JS9.CloseImage();
                     JS9.Load("latest", {onload: function() {
                         JS9.AddRegions("circle", {x: x, y: y, radius: radius});
                         if (cmap != null) {
                             JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                        };
+                        if (scale != null) {
+                            JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
                         };
                     }});
                 });
