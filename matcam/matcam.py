@@ -38,7 +38,17 @@ class MATServ(tornado.web.Application):
         Serves the main HTML page.
         """
         def get(self):
-            if self.application.camera is not None:
+            args = {
+                'filter': "N/A",
+                'filters': ["N/A"],
+                'frame_types': ["N/A"],
+                'cooling': "Off",
+                'temperature': "N/A",
+                'cooling_power': "N/A",
+                'requested_temp': self.application.requested_temp,
+                'status': False,
+            }
+            try:
                 args = {
                     'filter': self.application.camera.filter,
                     'filters': self.application.camera.filters,
@@ -49,17 +59,9 @@ class MATServ(tornado.web.Application):
                     'requested_temp': self.application.requested_temp,
                     'status': True,
                 }
-            else:
-                args = {
-                    'filter': "N/A",
-                    'filters': ["N/A"],
-                    'frame_types': ["N/A"],
-                    'cooling': "Off",
-                    'temperature': "N/A",
-                    'cooling_power': "N/A",
-                    'requested_temp': self.application.requested_temp,
-                    'status': False,
-                }
+            except Exception as e:
+                log.error("Can't load configuration from camera: %s" % e)
+
             self.render("matcam.html", args=args)
 
     class ExposureHandler(tornado.web.RequestHandler):
@@ -160,6 +162,9 @@ class MATServ(tornado.web.Application):
                 'requested_temp': self.application.requested_temp,
                 'status': False,
             }
+
+            if cam is None:
+                return status
 
             # make sure we can connect to camera and bail early if we can't
             if cam is not None:
