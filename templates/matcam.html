@@ -114,26 +114,32 @@
             </div>
             <script>
                 var busy = false;
-                x = 384.;
-                y = 256.;
-                radius = 20.;
-                $('#expose').on('click', function() {
+                var x = 384.;
+                var y = 256.;
+                var radius = 20.;
+                function disable() {
                     $('#connect').prop("disabled", true);
                     $('#expose').prop("disabled", true);
                     $('#cooling').prop("disabled", true);
                     $('#conftemp').prop("disabled", true);
                     busy = true;
+                };
+                function enable() {
+                    $('#connect').prop("disabled", false);
+                    $('#expose').prop("disabled", false);
+                    $('#cooling').prop("disabled", false);
+                    $('#conftemp').prop("disabled", false);
+                    busy = false;
+                }
+                $('#expose').on('click', function() {
+                    disable();
                     var exptype = $('#exptype').val();
                     var exptime = $('#exptime').val();
                     var filt = $('#filter').val();
                     var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
                     $.get(url, function(data, status) {
                         var logstuff = data + status;
-                        $('#connect').prop("disabled", false);
-                        $('#expose').prop("disabled", false);
-                        $('#cooling').prop("disabled", false);
-                        $('#conftemp').prop("disabled", false);
-                        busy = false;
+                        enable();
                     });
                     rarr = JS9.GetRegions();
                     if (rarr != null) {
@@ -158,31 +164,27 @@
                     }});
                 });
                 $('#cooling').on('click', function() {
+                    disable();
                     $.get("cooling", function(data, status) {
+                        enable();
                         var logstuff = data + status;
                     });
                 });
                 $('#conftemp').on('click', function(){
+                    disable();
                     var temp = $('#settemp').val();
                     var url = "temperature?temp=" + temp;
                     $.get(url, function(data, status) {
                         var logstuff = data + status;
                         $('#settemp').val(temp);
+                        enable();
                     });
                 });
                 $('#connect').on('click', function(){
-                    busy = true;
-                    $('#connect').prop("disabled", true);
-                    $('#expose').prop("disabled", true);
-                    $('#cooling').prop("disabled", true);
-                    $('#conftemp').prop("disabled", true);
+                    disable();
                     $.get("reset", function(data, status) {
                         var logstuff = data + status;
-                        $('#connect').prop("disabled", false);
-                        $('#expose').prop("disabled", false);
-                        $('#cooling').prop("disabled", false);
-                        $('#conftemp').prop("disabled", false);
-                        busy = false;
+                        enable();
                     });
                 });
 
