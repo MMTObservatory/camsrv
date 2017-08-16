@@ -144,9 +144,11 @@
                             radius = reg['radius'];
                         };
                     };
+                    cmap = JS9.GetColormap();
                     JS9.CloseImage();
                     JS9.Load("latest", {onload: function() {
                         JS9.AddRegions("circle", {x: x, y: y, radius: radius});
+                        JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
                     }});
                 });
                 $('#cooling').on('click', function() {
