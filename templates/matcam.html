@@ -157,9 +157,9 @@
                 $('#conftemp').on('click', function(){
                     var temp = $('#settemp').val();
                     var url = "temperature?temp=" + temp;
-                    $('#settemp').val(temp);
                     $.get(url, function(data, status) {
                         var logstuff = data + status;
+                        $('#settemp').val(temp);
                     });
                 });
                 $('#connect').on('click', function(){
@@ -206,6 +206,32 @@
                     <div class="JS9Menubar" data-width="768px"></div>
                     <div class="JS9" data-width="768px" data-height="512px"></div>
                     <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="768px"></div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col'>
+                    <p class="lead">
+                        This interface provides a means of controlling and acquiring data from the SBIG ST-402 that is attached to the Mount
+                        Alignment Telescope (MAT). Its use should be fairly straighforward and the 'Help' button provides details on the
+                        capabilities of the JS9 image analysis widget used here.  Some tips/caveats:
+                        <ul>
+                            <li>
+                                It is recommended to enable cooling when taking images and then turn it off when not in use. The cooler maxes
+                                out at about 30 ˚C below ambient, but every bit helps in reducing dark current and hot pixels.
+                            </li>
+                            <li>
+                                Reconnecting the camera from this interface is still not fully reliable. If there are issues or if
+                                the MAT has been powered off,
+                                it is best to login to an operator machine, run <tt>mmtserv matcam restart</tt>, and then reload this page.
+                            </li>
+                            <li>
+                                A circular region is added by default which can be used to measure image or object properties using tasks
+                                in the 'Analysis' menu. In particular, when focusing the MAT the 'Radial Proj' task can be used to create a
+                                radial profile of a star located in the selected region. The 'sigma' parameter is a measure of the width of the
+                                profile.
+                            </li>
+                        </ul>
+                    </p>
                 </div>
             </div>
         </div>
