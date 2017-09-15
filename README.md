@@ -1,2 +1,2 @@
-# MATcam
-Web interface for acquiring and analyzing data from the Mount Alignment Telescope (MAT)
+# MMTcam
+Web interfaces and back-end infrastructure for MMTO camera systems

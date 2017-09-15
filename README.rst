@@ -1,4 +1,7 @@
-Web interface to Mount Alignment Telescope camera, MATcam
+Web interfaces and back-end infrastructure for MMTO camera systems.  These include the cameras used for the Mount Alignment
+Telescope, the F/9 wavefront sensor, and the F/5 wavefront sensor.  The ultimate goal is to provide consistent, easily extensible
+front and back end interfaces to all camera systems used at the MMTO.
+
 ---------------------------------------------------------
 
 .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat

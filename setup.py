@@ -30,12 +30,12 @@ conf = ConfigParser()
 conf.read(['setup.cfg'])
 metadata = dict(conf.items('metadata'))
 
-PACKAGENAME = metadata.get('package_name', 'matcam')
-DESCRIPTION = metadata.get('description', 'Web interface to Mount Alignment Telescope camera, MATcam')
+PACKAGENAME = metadata.get('package_name', 'mmtcam')
+DESCRIPTION = metadata.get('description', 'Web interfaces and back-end infrastructure for MMTO camera systems')
 AUTHOR = metadata.get('author', 'T. E. Pickering')
 AUTHOR_EMAIL = metadata.get('author_email', 'te.pickering@gmail.com')
 LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'https://github.com/MMTObservatory/MATcam')
+URL = metadata.get('url', 'https://github.com/MMTObservatory/MMTcam')
 
 # order of priority for long_description:
 #   (1) set in setup.cfg,
