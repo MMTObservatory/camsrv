@@ -3,5 +3,5 @@
 	path = astropy_helpers
 	branch = refs/heads/v2.0
 [submodule "js9"]
-	path = js9
+	path = camsrv/web_resources/js9
 	url = https://github.com/ericmandel/js9

@@ -2,6 +2,8 @@
 MMTO Mount Aligment Telescope interface
 """
 
+import tornado
+
 from camsrv.matcam import MATServ
 
 if __name__ == "__main__":

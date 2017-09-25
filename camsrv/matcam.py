@@ -7,6 +7,7 @@ import io
 import socket
 import json
 import time
+import pkg_resources
 
 import logging
 import logging.handlers
@@ -210,12 +211,13 @@ class MATServ(tornado.web.Application):
                 log.error("Connection refused to local test server as well...")
 
     def __init__(self):
-        parent = Path(__file__).parent / ".."
+        parent = Path(pkg_resources.resource_filename(__name__, "web_resources"))
         template_path = parent / "templates"
         static_path = parent / "static"
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
 
+        print(js9_path)
         self.camera = None
 
         self.connect_camera()
