@@ -5,3 +5,6 @@
 [submodule "js9"]
 	path = camsrv/web_resources/js9
 	url = https://github.com/ericmandel/js9
+[submodule "camsrv/web_resources/js9"]
+	path = camsrv/web_resources/js9
+	url = https://github.com/ericmandel/js9

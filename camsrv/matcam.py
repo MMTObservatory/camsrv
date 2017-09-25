@@ -217,7 +217,6 @@ class MATServ(tornado.web.Application):
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
 
-        print(js9_path)
         self.camera = None
 
         self.connect_camera()
@@ -242,8 +241,8 @@ class MATServ(tornado.web.Application):
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
-            (r"/js9\.min\.js", tornado.web.StaticFileHandler, dict(path=js9_path / "js9.min.js")),
-            (r"/js9worker\.js", tornado.web.StaticFileHandler, dict(path=js9_path / "js9worker.js")),
+            (r"/js9\.min\.js(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9.min.js")),
+            (r"/js9worker\.js(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9worker.js")),
             (r"/images/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "images")),
             (r"/help/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "help")),
             (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "plugins")),

@@ -95,7 +95,11 @@ package_info = get_package_info()
 
 # Add the project-global data
 package_info['package_data'].setdefault(PACKAGENAME, [])
-package_info['package_data'][PACKAGENAME].append('web_resources/*')
+package_info['package_data'][PACKAGENAME].append('web_resources/js9/*')
+package_info['package_data'][PACKAGENAME].append('web_resources/bootstrap/css/*')
+package_info['package_data'][PACKAGENAME].append('web_resources/bootstrap/js/*')
+package_info['package_data'][PACKAGENAME].append('web_resources/bootstrap/fonts/*')
+package_info['package_data'][PACKAGENAME].append('web_resources/templates/*')
 
 # Define entry points for command-line scripts
 entry_points = {'console_scripts': []}
