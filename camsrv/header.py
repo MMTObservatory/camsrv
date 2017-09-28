@@ -11,6 +11,7 @@ urllib3.disable_warnings()
 import redis
 
 import astropy.units as u
+from astropy.units import cds
 from astropy.coordinates import Angle
 
 API_HOST = "https://api.mmto.arizona.edu/APIv1"
@@ -71,6 +72,11 @@ HEADER_MAP = {
         'fitskey': "UT",
         'comment': "UT of observation",
         'units': u.hour,
+    },
+    'mount_mini_ut': {
+        'fitskey': "DATE-OBS",
+        'comment': "Date of observation",
+        'units': None,
     },
     'mount_mini_lst': {
         'fitskey': "LST",
@@ -147,6 +153,61 @@ HEADER_MAP = {
         'comment': "Average OSS Temperature",
         'units': u.Celsius,
     },
+    'ds_atmospheric_pressure': {
+        'fitskey': "P_BARO",
+        'comment': "Barometric Pressure",
+        'units': cds.mbar,
+    },
+    'ds_chamber_dew': {
+        'fitskey': "CHAM_DPT",
+        'comment': "Chamber Dewpoint",
+        'units': u.Celsius,
+    },
+    'ds_chamber_rh': {
+        'fitskey': "CHAM_RH",
+        'comment': "Chamber RH",
+        'units': u.percent,
+    },
+    'ds_chamber_temp': {
+        'fitskey': "CHAM_T",
+        'comment': "Chamber Temperature",
+        'units': u.Celsius,
+    },
+    'ds_outside_dew': {
+        'fitskey': "OUT_DPT",
+        'comment': "Outside Dewpoint",
+        'units': u.Celsius,
+    },
+    'ds_outside_rh': {
+        'fitskey': "OUT_RH",
+        'comment': "Outside RH",
+        'units': u.percent,
+    },
+    'ds_outside_temp': {
+        'fitskey': "OUT_T",
+        'comment': "Outside Temperature",
+        'units': u.Celsius,
+    },
+    'ds_east_wind_speed_mph': {
+        'fitskey': "WIND_E",
+        'comment': "Wind Speed (east sensor)",
+        'units': u.imperial.mile / u.hour,
+    },
+    'ds_east_wind_direction': {
+        'fitskey': "WDIR_E",
+        'comment': "Wind Direction (east sensor)",
+        'units': u.degree,
+    },
+    'ds_west_wind_speed_mph': {
+        'fitskey': "WIND_W",
+        'comment': "Wind Speed (west sensor)",
+        'units': u.imperial.mile / u.hour,
+    },
+    'ds_west_wind_direction': {
+        'fitskey': "WDIR_W",
+        'comment': "Wind Direction (west sensor)",
+        'units': u.degree,
+    }
 }
 
 
