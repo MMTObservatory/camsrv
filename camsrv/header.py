@@ -13,6 +13,7 @@ import redis
 import astropy.units as u
 from astropy.units import cds
 from astropy.coordinates import Angle
+from astropy.io import fits
 
 API_HOST = "https://api.mmto.arizona.edu/APIv1"
 REDIS_HOST = "ops.mmto.arizona.edu"
@@ -90,7 +91,7 @@ HEADER_MAP = {
     },
     'mount_mini_airmass': {
         'fitskey': "AIRMASS",
-        'comment': "Object Airmass (Secant of Zenith Distance) at time of observation",
+        'comment': "Object Airmass (Secant of Zenith Distance)",
         'units': None,
     },
     'mount_mini_total_off_alt': {
@@ -133,7 +134,7 @@ HEADER_MAP = {
         'comment': "Hexapod Y Translation (um)",
         'units': u.micron,
     },
-    'hexapod_mini_curxyz_z': {
+    'hexapod_mini_curxyz_x': {
         'fitskey': "TRANSX",
         'comment': "Hexapod X Translation (um)",
         'units': u.micron,
@@ -216,6 +217,13 @@ def get_redis_keys(r=redis.StrictRedis(host=REDIS_HOST)):
     return keys
 
 
+def get_redis(keys=[], r=redis.StrictRedis(host=REDIS_HOST)):
+    if not isinstance(keys, list):
+        keys = [keys]
+    vals = r.mget(keys)
+    return dict(zip(keys, vals))
+
+
 def get_api_keys(http=urllib3.PoolManager()):
     """
     Get list of redis keys via the MMTO web api
@@ -230,6 +238,8 @@ def get_api(keys=[], http=urllib3.PoolManager()):
     """
     Given list of keys, return a dict containing the redis values for each keys
     """
+    if not isinstance(keys, list):
+        keys = [keys]
     url = API_HOST + "/vals"
     r = http.request(
         'POST',
@@ -238,3 +248,29 @@ def get_api(keys=[], http=urllib3.PoolManager()):
     )
     data = json.loads(r.data.decode('utf-8'))
     return data
+
+
+def update_header(f=fits.hdu.image.PrimaryHDU()):
+    """
+    Given a FITS PrimaryHDU object or a list of HDUs, insert data from redis into the primary headers
+    and return updates HDU or HDU list
+    """
+    if isinstance(f, fits.hdu.image.PrimaryHDU):
+        header = f.header
+    elif isinstance(f, list):
+        header = None
+        for hdu in f:
+            if isinstance(hdu, fits.hdu.image.PrimaryHDU):
+                header = hdu.header
+        if header is None:
+            raise ValueError("No PrimaryHDU found in HDU list.")
+    else:
+        raise ValueError("Must provide a PrimaryHDU object or an HDU list that contains one.")
+
+    keys = list(HEADER_MAP.keys())
+    data = get_api(keys)
+
+    for k in keys:
+        header.append((HEADER_MAP[k]['fitskey'], data[k], HEADER_MAP[k]['comment']))
+
+    return f
