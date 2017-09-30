@@ -29,6 +29,8 @@ from pathlib import Path
 
 from sbigclient.sbigcam import CCDCam, MATCam
 
+from .header import update_header
+
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
@@ -84,7 +86,9 @@ class MATServ(tornado.web.Application):
 
                 hdulist = cam.expose(exptime=float(exptime), exptype=exptype)
                 if hdulist is not None:
+                    hdulist = update_header(hdulist)
                     self.application.latest_image = hdulist[0]
+                    self.application.save_latest()
                 else:
                     log.error("Exposure failed.")
             else:
@@ -210,12 +214,22 @@ class MATServ(tornado.web.Application):
             except (ConnectionRefusedError, socket.gaierror):
                 log.error("Connection refused to local test server as well...")
 
+    def save_latest(self):
+        if self.latest_image is not None:
+            filename = self.savedir / "matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
+            self.latest_image.writeto(filename)
+
     def __init__(self):
         parent = Path(pkg_resources.resource_filename(__name__, "web_resources"))
         template_path = parent / "templates"
         static_path = parent / "static"
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
+
+        if 'MATCAMROOT' in os.environ:
+            self.savedir = Path(os.environ['MATCAMROOT'])
+        else:
+            self.savedir = Path("/mmt/matcam/latest")
 
         self.camera = None
 
