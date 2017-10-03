@@ -74,11 +74,6 @@ HEADER_MAP = {
         'comment': "UT of observation",
         'units': u.hour,
     },
-    'mount_mini_ut': {
-        'fitskey': "DATE-OBS",
-        'comment': "Date of observation",
-        'units': None,
-    },
     'mount_mini_lst': {
         'fitskey': "LST",
         'comment': "Sidereal Time of observation",
@@ -153,6 +148,16 @@ HEADER_MAP = {
         'fitskey': "OSSTEMP",
         'comment': "Average OSS Temperature",
         'units': u.Celsius,
+    },
+    'hexapod_mini_secondary': {
+        'fitskey': "SECNDRY",
+        'comment': "Mounted secondary mirror",
+        'units': None,
+    },
+    'hexapod_mini_instrument': {
+        'fitskey': "INST",
+        'comment': "Mounted instrument",
+        'units': None,
     },
     'ds_atmospheric_pressure': {
         'fitskey': "P_BARO",

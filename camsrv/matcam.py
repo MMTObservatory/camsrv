@@ -44,7 +44,7 @@ class MATsrv(CAMsrv):
 
     def save_latest(self):
         if self.latest_image is not None:
-            filename = self.savedir / "matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
+            filename = self.savedir / Path("matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             self.latest_image.writeto(filename)
 
     def __init__(self):
