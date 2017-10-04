@@ -27,7 +27,7 @@ enable_pretty_logging()
 
 from pathlib import Path
 
-from sbigclient.sbigcam import MATCam
+from sbigclient.sbigcam import MATCam, SimCam
 
 from .header import update_header
 
@@ -202,7 +202,7 @@ class CAMsrv(tornado.web.Application):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = CCDCam(host="localhost", port=7624)
+            self.camera = SimCam(host="localhost", port=7624)
             self.camera.driver = "CCD Simulator"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to INDI CCD Simulator...")

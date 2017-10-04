@@ -18,7 +18,7 @@ logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
-from sbigclient.sbigcam import CCDCam, MATCam
+from sbigclient.sbigcam import SimCam, MATCam
 
 from .header import update_header
 from .camsrv import CAMsrv
@@ -38,7 +38,7 @@ class MATsrv(CAMsrv):
         # fall back to the test simulator server
         if self.camera is None:
             try:
-                self.camera = CCDCam(host="localhost", port=7624)
+                self.camera = SimCam(host="localhost", port=7624)
             except (ConnectionRefusedError, socket.gaierror):
                 log.error("Connection refused to local test server as well...")
 

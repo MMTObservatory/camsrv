@@ -23,8 +23,8 @@
           right: 0;
           bottom: 0;
           left: 0;
-          width: 768px;
-          height: 512px;
+          width: 1280px;
+          height: 1024px;
       }
       .form-inline label {
           margin-left: 15px;
@@ -140,20 +140,10 @@
                         var logstuff = data + status;
                         enable();
                     });
-                    rarr = JS9.GetRegions();
-                    if (rarr != null) {
-                        if (rarr.length > 0) {
-                            reg = rarr[0];
-                            x = reg['x'];
-                            y = reg['y'];
-                            radius = reg['radius'];
-                        };
-                    };
                     cmap = JS9.GetColormap();
                     scale = JS9.GetScale();
                     JS9.CloseImage();
                     JS9.Load("latest", {onload: function() {
-                        JS9.AddRegions("circle", {x: x, y: y, radius: radius});
                         if (cmap != null) {
                             JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
                         };
@@ -212,9 +202,9 @@
             </script>
             <div class='row'>
                 <div class='col-12'>
-                    <div class="JS9Menubar" data-width="768px"></div>
-                    <div class="JS9" data-width="768px" data-height="512px"></div>
-                    <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="768px"></div>
+                    <div class="JS9Menubar" data-width="1280px"></div>
+                    <div class="JS9" data-width="1280px" data-height="1024px"></div>
+                    <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="1280px"></div>
                 </div>
             </div>
         </div>
