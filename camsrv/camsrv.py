@@ -49,6 +49,8 @@ class CAMsrv(tornado.web.Application):
                 'temperature': "N/A",
                 'cooling_power': "N/A",
                 'requested_temp': self.application.requested_temp,
+                'binning': {'X': "N/A", 'Y': "N/A"},
+                'frame': {'X': "N/A", 'Y': "N/A", "width": "N/A", "height": "N/A"},
                 'status': False,
             }
             try:
@@ -60,6 +62,8 @@ class CAMsrv(tornado.web.Application):
                     'temperature': self.application.camera.temperature,
                     'cooling_power': self.application.camera.cooling_power,
                     'requested_temp': self.application.requested_temp,
+                    'binning': self.application.camera.binning,
+                    'frame': self.application.camera.frame,
                     'status': True,
                 }
             except Exception as e:
@@ -194,6 +198,8 @@ class CAMsrv(tornado.web.Application):
                     'cooling_power': cooling_power,
                     'temperature': "%.1f" % cam.temperature,
                     'requested_temp': self.application.requested_temp,
+                    'binning': cam.binning,
+                    'frame': cam.frame,
                     'status': True,
                 }
             self.write(json.dumps(status))
@@ -254,7 +260,7 @@ class CAMsrv(tornado.web.Application):
             (r"/fits/(.*)", tornado.web.StaticFileHandler, dict(path=parent / "fitsdata")),
         ]
 
-        if hasattr(self, extra_handlers):
+        if hasattr(self, "extra_handlers"):
             self.handlers.append(self.extra_handlers)
 
         super(CAMsrv, self).__init__(self.handlers, **self.settings)
