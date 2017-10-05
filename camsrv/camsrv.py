@@ -254,4 +254,7 @@ class CAMsrv(tornado.web.Application):
             (r"/fits/(.*)", tornado.web.StaticFileHandler, dict(path=parent / "fitsdata")),
         ]
 
+        if hasattr(self, extra_handlers):
+            self.handlers.append(self.extra_handlers)
+
         super(CAMsrv, self).__init__(self.handlers, **self.settings)
