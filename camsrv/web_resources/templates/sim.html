@@ -28,7 +28,10 @@
       }
       .form-inline label {
           margin-left: 15px;
-          margin-right: 5px;
+          margin-right: 10px;
+      }
+      .form-inline button {
+          margin-left: 10px;
       }
     </style>
     <title>MMTO Camera Interface Simulator</title>
@@ -38,176 +41,177 @@
     </div>
 
     <div class="container">
-        <div id="centerdiv">
-            <div class="row justify-content-between">
-                <div class='col-10'>
-                    <form class="form-inline">
-                        <div class="form-group">
-                            <label for="filter">Filter:</label>
-                            <select class="form-control form-control-sm" id="filter">
-                                {% for f in args['filters'] %}
-                                    {% if f == args['filter'] %}
-                                        <option selected value={{ f }}>{{ f }}</option>
-                                    {% else %}
-                                        <option value={{ f }}>{{ f }}</option>
-                                    {% end %}
-                                {% end %}
-                            </select>
-                            <label for="exptype">Exposure Type:</label>
-                            <select class="form-control form-control-sm" id="exptype">
-                                {% for f in args['frame_types'] %}
-                                    {% if f == 'Light' %}
-                                        <option selected value={{ f }}>{{ f }}</option>
-                                    {% else %}
-                                        <option value={{ f }}>{{ f }}</option>
-                                    {% end %}
-                                {% end %}
-                            </select>
-                            <label for="exptime">Exposure Time (sec):</label>
-                            <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=0.1 value=1.0 id="exptime">
-                        </div>
-                    </form>
-                </div>
-                <div class='col-2'>
-                    <span class="input-group-btn">
-                        <button type="button" id="expose" class="btn btn-primary">Expose</button>
-                    </span>
-                </div>
-            </div>
-            <div class="row justify-content-left">
-                <div class='col align-self-left'>
-                    <form class="form-inline">
-                        <div class="form-group">
-                            <label class="form-check-label">
-                                Enable Cooling:
-                                {% if args['cooling'] == "On" %}
-                                    <input id="cooling" type="checkbox" class="form-check-input" checked>
+
+        <div class="row justify-content-between">
+            <div class='col-10'>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="filter">Filter:</label>
+                        <select class="form-control form-control-sm" id="filter">
+                            {% for f in args['filters'] %}
+                                {% if f == args['filter'] %}
+                                    <option selected value={{ f }}>{{ f }}</option>
                                 {% else %}
-                                    <input id="cooling" type="checkbox" class="form-check-input">
+                                    <option value={{ f }}>{{ f }}</option>
                                 {% end %}
-                            </label>
-                            <label for="settemp">Set Temp (˚C):</label>
-                            <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
-                            <button id="conftemp" class="btn btn-primary btn-sm">Configure</button>
-                        </div>
-                    </form>
-                </div>
-
+                            {% end %}
+                        </select>
+                        <label for="exptype">Exposure Type:</label>
+                        <select class="form-control form-control-sm" id="exptype">
+                            {% for f in args['frame_types'] %}
+                                {% if f == 'Light' %}
+                                    <option selected value={{ f }}>{{ f }}</option>
+                                {% else %}
+                                    <option value={{ f }}>{{ f }}</option>
+                                {% end %}
+                            {% end %}
+                        </select>
+                        <label for="exptime">Exposure Time (sec):</label>
+                        <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=0.1 value=1.0 id="exptime">
+                    </div>
+                    <button type="button" id="expose" class="btn btn-primary">Expose</button>
+                </form>
             </div>
-            <div class="row justify-content-between align-items-center">
-                <div class='col-5'>
-                    <b>Camera Temp:</b> <div id="ctemp">N/A ˚C</div>
-                </div>
-                <div class='col-5'>
-                    <b>Cooling Power:</b> <div id="cpower">N/A%</div>
-                </div>
-                <div class="col-2">
-                    <span class="input-group-btn">
-                        {% if args['status'] %}
-                            <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
-                        {% else %}
-                            <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
-                        {% end %}
-                    </span>
-                </div>
-            </div>
-            <script>
-                var busy = false;
-                var x = 384.;
-                var y = 256.;
-                var radius = 20.;
-                function disable() {
-                    $('#connect').prop("disabled", true);
-                    $('#expose').prop("disabled", true);
-                    $('#cooling').prop("disabled", true);
-                    $('#conftemp').prop("disabled", true);
-                    busy = true;
-                };
-                function enable() {
-                    $('#connect').prop("disabled", false);
-                    $('#expose').prop("disabled", false);
-                    $('#cooling').prop("disabled", false);
-                    $('#conftemp').prop("disabled", false);
-                    busy = false;
-                }
-                $('#expose').on('click', function() {
-                    disable();
-                    var exptype = $('#exptype').val();
-                    var exptime = $('#exptime').val();
-                    var filt = $('#filter').val();
-                    var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
-                    $.get(url, function(data, status) {
-                        var logstuff = data + status;
-                        enable();
-                    });
-                    cmap = JS9.GetColormap();
-                    scale = JS9.GetScale();
-                    JS9.CloseImage();
-                    JS9.Load("latest", {onload: function() {
-                        if (cmap != null) {
-                            JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-                        };
-                        if (scale != null) {
-                            JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
-                        };
-                    }});
-                });
-                $('#cooling').on('click', function() {
-                    disable();
-                    $.get("cooling", function(data, status) {
-                        enable();
-                        var logstuff = data + status;
-                    });
-                });
-                $('#conftemp').on('click', function(){
-                    disable();
-                    var temp = $('#settemp').val();
-                    var url = "temperature?temp=" + temp;
-                    $.get(url, function(data, status) {
-                        var logstuff = data + status;
-                        $('#settemp').val(temp);
-                        enable();
-                    });
-                });
-                $('#connect').on('click', function(){
-                    disable();
-                    $.get("reset", function(data, status) {
-                        var logstuff = data + status;
-                        enable();
-                    });
-                });
+            <div class='col-2'>
+                <span class="input-group-btn">
 
-                (function update() {
-                    $.getJSON("status", {format: "json"}).done(function(data) {
-                        if (busy == false) {
-                            $('#ctemp').html(data['temperature'] + " ˚C");
-                            $('#cpower').html(data['cooling_power'] + "%");
-                            if (data['cooling'] == "On") {
-                                $('#cooling').prop('checked', true);
-                            } else {
-                                $('#cooling').prop('checked', false);
-                            };
-                            if (data['status'] == true) {
-                                $("#connect").removeClass("btn-danger");
-                                $("#connect").addClass("btn-success");
-                            } else {
-                                $("#connect").removeClass("btn-success");
-                                $("#connect").addClass("btn-danger");
-                            };
-                        };
-                        setTimeout(update, 5000);
-                    });
-                })();
-
-            </script>
-            <div class='row'>
-                <div class='col-12'>
-                    <div class="JS9Menubar" data-width="1280px"></div>
-                    <div class="JS9" data-width="1280px" data-height="1024px"></div>
-                    <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="1280px"></div>
-                </div>
+                </span>
             </div>
         </div>
+        <div class="row justify-content-left">
+            <div class='col align-self-left'>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            Enable Cooling:
+                            {% if args['cooling'] == "On" %}
+                                <input id="cooling" type="checkbox" class="form-check-input" checked>
+                            {% else %}
+                                <input id="cooling" type="checkbox" class="form-check-input">
+                            {% end %}
+                        </label>
+                        <label for="settemp">Set Temp (˚C):</label>
+                        <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
+                        <button id="conftemp" class="btn btn-primary btn-sm">Configure</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <div class="row justify-content-between align-items-center">
+            <div class='col-5'>
+                <b>Camera Temp:</b> <div id="ctemp">N/A ˚C</div>
+            </div>
+            <div class='col-5'>
+                <b>Cooling Power:</b> <div id="cpower">N/A%</div>
+            </div>
+            <div class="col-2">
+                <span class="input-group-btn">
+                    {% if args['status'] %}
+                        <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
+                    {% else %}
+                        <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
+                    {% end %}
+                </span>
+            </div>
+        </div>
+        <script>
+            var busy = false;
+            var x = 384.;
+            var y = 256.;
+            var radius = 20.;
+            function disable() {
+                $('#connect').prop("disabled", true);
+                $('#expose').prop("disabled", true);
+                $('#cooling').prop("disabled", true);
+                $('#conftemp').prop("disabled", true);
+                busy = true;
+            };
+            function enable() {
+                $('#connect').prop("disabled", false);
+                $('#expose').prop("disabled", false);
+                $('#cooling').prop("disabled", false);
+                $('#conftemp').prop("disabled", false);
+                busy = false;
+            }
+            $('#expose').on('click', function() {
+                disable();
+                var exptype = $('#exptype').val();
+                var exptime = $('#exptime').val();
+                var filt = $('#filter').val();
+                var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
+                $.get(url, function(data, status) {
+                    var logstuff = data + status;
+                    enable();
+                });
+                cmap = JS9.GetColormap();
+                scale = JS9.GetScale();
+                JS9.CloseImage();
+                JS9.Load("latest", {onload: function() {
+                    if (cmap != null) {
+                        JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                    };
+                    if (scale != null) {
+                        JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
+                    };
+                }});
+            });
+            $('#cooling').on('click', function() {
+                disable();
+                $.get("cooling", function(data, status) {
+                    enable();
+                    var logstuff = data + status;
+                });
+            });
+            $('#conftemp').on('click', function(){
+                disable();
+                var temp = $('#settemp').val();
+                var url = "temperature?temp=" + temp;
+                $.get(url, function(data, status) {
+                    var logstuff = data + status;
+                    $('#settemp').val(temp);
+                    enable();
+                });
+            });
+            $('#connect').on('click', function(){
+                disable();
+                $.get("reset", function(data, status) {
+                    var logstuff = data + status;
+                    enable();
+                });
+            });
+
+            (function update() {
+                $.getJSON("status", {format: "json"}).done(function(data) {
+                    if (busy == false) {
+                        $('#ctemp').html(data['temperature'] + " ˚C");
+                        $('#cpower').html(data['cooling_power'] + "%");
+                        if (data['cooling'] == "On") {
+                            $('#cooling').prop('checked', true);
+                        } else {
+                            $('#cooling').prop('checked', false);
+                        };
+                        if (data['status'] == true) {
+                            $("#connect").removeClass("btn-danger");
+                            $("#connect").addClass("btn-success");
+                        } else {
+                            $("#connect").removeClass("btn-success");
+                            $("#connect").addClass("btn-danger");
+                        };
+                    };
+                    setTimeout(update, 5000);
+                });
+            })();
+
+        </script>
+        <div class='row'>
+            <div class='col-12'>
+                <div class="JS9Menubar" data-width="1280px"></div>
+                <div class="JS9" data-width="1280px" data-height="1024px"></div>
+                <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="1280px"></div>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>
