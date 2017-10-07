@@ -179,8 +179,8 @@ class CAMsrv(tornado.web.Application):
                     'X': int(self.get_argument('x_bin', curr_bin['X'])),
                     'Y': int(self.get_argument('y_bin', curr_bin['Y'])),
                 }
-                cam.frame = framedict
                 cam.binning = bindict
+                cam.frame = framedict
 
     class StatusHandler(tornado.web.RequestHandler):
         """
