@@ -15,6 +15,11 @@ except ImportError:
     raise RuntimeError("This server requires tornado.")
 
 import tornado.web
+import tornado.httpserver
+import tornado.ioloop
+import tornado.websocket
+from tornado.log import enable_pretty_logging
+enable_pretty_logging()
 
 from pathlib import Path
 
