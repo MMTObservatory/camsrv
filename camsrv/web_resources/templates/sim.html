@@ -90,16 +90,41 @@
                         </label>
                         <label for="settemp">Set Temp (˚C):</label>
                         <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
-                        <button id="conftemp" class="btn btn-primary btn-sm">Configure</button>
-                        {% if args['status'] %}
-                            <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
-                        {% else %}
-                            <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
-                        {% end %}
+                        <button id="conftemp" class="btn btn-primary btn-sm">Configure Temp</button>
                     </div>
                 </form>
             </div>
 
+        </div>
+        <div class="row justify-content-left">
+            <div class='col align-self-left'>
+                <div class="form-inline">
+                    <label for="frame_x">Lower X:</label>
+                    <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ args['frame']['X'] }} id="frame_x">
+                    <label for="frame_y">Lower Y:</label>
+                    <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ args['frame']['Y'] }} id="frame_y">
+                    <label for="frame_w">Width:</label>
+                    <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ args['frame']['width'] }} id="frame_w">
+                    <label for="frame_h">Height:</label>
+                    <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ args['frame']['height'] }} id="frame_h">
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-left">
+            <div class='col align-self-left'>
+                <div class="form-inline">
+                    <label for="x_bin">X binning:</label>
+                    <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ args['binning']['X'] }} id="x_bin">
+                    <label for="y_bin">Y binning:</label>
+                    <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ args['binning']['Y'] }} id="y_bin">
+                    <button type="button" id="confccd" class="btn btn-primary btn-sm">Configure CCD</button>
+                    {% if args['status'] %}
+                        <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
+                    {% else %}
+                        <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
+                    {% end %}
+                </div>
+            </div>
         </div>
         <div class="row justify-content-left">
             <div class='col align-self-left'>
@@ -119,6 +144,7 @@
                 $('#expose').prop("disabled", true);
                 $('#cooling').prop("disabled", true);
                 $('#conftemp').prop("disabled", true);
+                $('#confccd').prop("disabled", true);
                 busy = true;
             };
             function enable() {
@@ -126,6 +152,7 @@
                 $('#expose').prop("disabled", false);
                 $('#cooling').prop("disabled", false);
                 $('#conftemp').prop("disabled", false);
+                $('#confccd').prop("disabled", false);
                 busy = false;
             }
             $('#expose').on('click', function() {
@@ -139,14 +166,10 @@
                     enable();
                 });
                 cmap = JS9.GetColormap();
-                scale = JS9.GetScale();
                 JS9.CloseImage();
                 JS9.Load("latest", {onload: function() {
                     if (cmap != null) {
                         JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-                    };
-                    if (scale != null) {
-                        JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
                     };
                 }});
             });
@@ -164,6 +187,24 @@
                 $.get(url, function(data, status) {
                     var logstuff = data + status;
                     $('#settemp').val(temp);
+                    enable();
+                });
+            });
+            $('#confccd').on('click', function(){
+                disable();
+                var frame_x = $('#frame_x').val();
+                var frame_y = $('#frame_y').val();
+                var frame_w = $('#frame_w').val();
+                var frame_h = $('#frame_h').val();
+                var x_bin = $('#x_bin').val();
+                var y_bin = $('#y_bin').val();
+                var url = "ccdconf?frame_x=" + frame_x;
+                url += "&frame_y=" + frame_y;
+                url += "&frame_w=" + frame_w;
+                url += "&frame_h=" + frame_h;
+                url += "&x_bin=" + x_bin;
+                url += "&y_bin=" + y_bin;
+                $.get(url, function(data, status) {
                     enable();
                 });
             });
@@ -192,6 +233,12 @@
                             $("#connect").removeClass("btn-success");
                             $("#connect").addClass("btn-danger");
                         };
+                        $('#frame_x').val(data['frame']['X']);
+                        $('#frame_y').val(data['frame']['Y']);
+                        $('#frame_w').val(data['frame']['width']);
+                        $('#frame_h').val(data['frame']['height']);
+                        $('#x_bin').val(data['binning']['X']);
+                        $('#y_bin').val(data['binning']['Y']);
                     };
                     setTimeout(update, 5000);
                 });

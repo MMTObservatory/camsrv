@@ -51,6 +51,7 @@ class CAMsrv(tornado.web.Application):
                 'requested_temp': self.application.requested_temp,
                 'binning': {'X': "N/A", 'Y': "N/A"},
                 'frame': {'X': "N/A", 'Y': "N/A", "width": "N/A", "height": "N/A"},
+                'ccdinfo': {'CCD_MAX_X': 1280, 'CCD_MAX_Y': 1024},
                 'status': False,
             }
             try:
@@ -64,6 +65,7 @@ class CAMsrv(tornado.web.Application):
                     'requested_temp': self.application.requested_temp,
                     'binning': self.application.camera.binning,
                     'frame': self.application.camera.frame,
+                    'ccdinfo': self.application.camera.ccd_info,
                     'status': True,
                 }
             except Exception as e:
@@ -158,6 +160,28 @@ class CAMsrv(tornado.web.Application):
             else:
                 log.warning("Unable to set camera temperature to %s" % temp)
 
+    class CCDHandler(tornado.web.RequestHandler):
+        """
+        Configure the CCD readout region and binning
+        """
+        def get(self):
+            cam = self.application.camera
+            if cam is not None:
+                curr_frame = cam.frame
+                curr_bin = cam.binning
+                framedict = {
+                    'X': int(self.get_argument('frame_x', curr_frame['X'])),
+                    'Y': int(self.get_argument('frame_y', curr_frame['Y'])),
+                    'width': int(self.get_argument('frame_w', curr_frame['width'])),
+                    'height': int(self.get_argument('frame_h', curr_frame['height'])),
+                }
+                bindict = {
+                    'X': int(self.get_argument('x_bin', curr_bin['X'])),
+                    'Y': int(self.get_argument('y_bin', curr_bin['Y'])),
+                }
+                cam.frame = framedict
+                cam.binning = bindict
+
     class StatusHandler(tornado.web.RequestHandler):
         """
         Send JSON dict of status information
@@ -247,6 +271,7 @@ class CAMsrv(tornado.web.Application):
             (r"/reset", self.ResetHandler),
             (r"/status", self.StatusHandler),
             (r"/temperature", self.TemperatureHandler),
+            (r"/ccdconf", self.CCDHandler),
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
