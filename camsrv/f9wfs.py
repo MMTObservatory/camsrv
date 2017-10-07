@@ -9,6 +9,13 @@ import json
 import time
 import pkg_resources
 
+try:
+    import tornado
+except ImportError:
+    raise RuntimeError("This server requires tornado.")
+
+import tornado.web
+
 from pathlib import Path
 
 import logging
