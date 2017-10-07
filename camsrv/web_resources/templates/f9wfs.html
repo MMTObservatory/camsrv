@@ -44,48 +44,6 @@
     </div>
 
     <div class="container">
-
-        <div class="row justify-content-between">
-            <div class='col-10'>
-                <form class="form-inline">
-                    <div class="form-group">
-                        <label for="exptype">Exposure Type:</label>
-                        <select class="form-control form-control-sm" id="exptype">
-                            {% for f in args['frame_types'] %}
-                                {% if f == 'Light' %}
-                                    <option selected value={{ f }}>{{ f }}</option>
-                                {% else %}
-                                    <option value={{ f }}>{{ f }}</option>
-                                {% end %}
-                            {% end %}
-                        </select>
-                        <label for="exptime">Exposure Time (sec):</label>
-                        <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=0.1 value=1.0 id="exptime">
-                    </div>
-                    <button type="button" id="expose" class="btn btn-primary">Expose</button>
-                </form>
-            </div>
-        </div>
-        <div class="row justify-content-left">
-            <div class='col align-self-left'>
-                <form class="form-inline">
-                    <div class="form-group">
-                        <label class="form-check-label">
-                            Enable Cooling:
-                            {% if args['cooling'] == "On" %}
-                                <input id="cooling" type="checkbox" class="form-check-input" checked>
-                            {% else %}
-                                <input id="cooling" type="checkbox" class="form-check-input">
-                            {% end %}
-                        </label>
-                        <label for="settemp">Set Temp (˚C):</label>
-                        <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
-                        <button id="conftemp" class="btn btn-primary btn-sm">Configure Temp</button>
-                    </div>
-                </form>
-            </div>
-
-        </div>
         <div class="row justify-content-left">
             <div class='col align-self-left'>
                 <div class="form-inline">
@@ -93,6 +51,12 @@
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['X']) }} id="frame_x">
                     <label for="frame_y">Lower Y (<div id="cframe_y"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ int(args['frame']['Y']) }} id="frame_y">
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-left">
+            <div class='col align-self-left'>
+                <div class="form-inline">
                     <label for="frame_w">Width (<div id="cframe_w"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['width']) }} id="frame_w">
                     <label for="frame_h">Height (<div id="cframe_h"></div>):</label>
@@ -126,10 +90,50 @@
         </div>
         <div class="row justify-content-left">
             <div class='col align-self-left'>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            Enable Cooling:
+                            {% if args['cooling'] == "On" %}
+                                <input id="cooling" type="checkbox" class="form-check-input" checked>
+                            {% else %}
+                                <input id="cooling" type="checkbox" class="form-check-input">
+                            {% end %}
+                        </label>
+                        <label for="settemp">Set Temp (˚C):</label>
+                        <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
+                        <button id="conftemp" class="btn btn-primary btn-sm">Configure Temp</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row justify-content-left">
+            <div class='col align-self-left'>
                 <div class="form-inline">
                     <label for="ctemp"><b>Camera Temp:</b></label> <div id="ctemp">N/A ˚C</div>
                     <label for="cpower"><b>Cooling Power:</b></label> <div id="cpower">N/A%</div>
                 </div>
+            </div>
+        </div>
+        <div class="row justify-content-between">
+            <div class='col-10'>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="exptype">Exposure Type:</label>
+                        <select class="form-control form-control-sm" id="exptype">
+                            {% for f in args['frame_types'] %}
+                                {% if f == 'Light' %}
+                                    <option selected value={{ f }}>{{ f }}</option>
+                                {% else %}
+                                    <option value={{ f }}>{{ f }}</option>
+                                {% end %}
+                            {% end %}
+                        </select>
+                        <label for="exptime">Exposure Time (sec):</label>
+                        <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=0.1 value=1.0 id="exptime">
+                    </div>
+                    <button type="button" id="expose" class="btn btn-primary">Expose</button>
+                </form>
             </div>
         </div>
         <script>
