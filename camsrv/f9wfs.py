@@ -47,7 +47,7 @@ class F9WFSsrv(CAMsrv):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = MATCam(host="f9indi", port=7624)
+            self.camera = F9WFSCam(host="f9indi", port=7624)
             self.camera.driver = "SBIG CCD"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to f9wfs camera host. Falling back to test server...")
@@ -77,7 +77,7 @@ class F9WFSsrv(CAMsrv):
         if 'WFSROOT' in os.environ:
             self.savedir = Path(os.environ['WFSROOT'])
         else:
-            self.savedir = Path("/mmt/wfsdat/datadir")
+            self.savedir = Path("/mmt/shwfs/datadir")
 
         self.camera = None
 

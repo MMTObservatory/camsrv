@@ -4,7 +4,7 @@ F/9 WFS camera interface
 
 import tornado
 
-from camsrv.camsrv import F9WFSsrv
+from camsrv.f9wfs import F9WFSsrv
 
 port = 8787
 
