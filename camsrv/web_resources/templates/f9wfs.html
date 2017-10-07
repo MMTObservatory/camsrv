@@ -49,16 +49,6 @@
             <div class='col-10'>
                 <form class="form-inline">
                     <div class="form-group">
-                        <label for="filter">Filter:</label>
-                        <select class="form-control form-control-sm" id="filter">
-                            {% for f in args['filters'] %}
-                                {% if f == args['filter'] %}
-                                    <option selected value={{ f }}>{{ f }}</option>
-                                {% else %}
-                                    <option value={{ f }}>{{ f }}</option>
-                                {% end %}
-                            {% end %}
-                        </select>
                         <label for="exptype">Exposure Type:</label>
                         <select class="form-control form-control-sm" id="exptype">
                             {% for f in args['frame_types'] %}
