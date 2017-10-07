@@ -39,7 +39,7 @@
     </style>
     <title>F/9 Wavefront Sensor Camera Interface</title>
 <body>
-    <div class="page-header">
+    <div class="page-header" align="center">
         <h1 class="display-4">F/9 Wavefront Sensor Camera Interface</h1>
     </div>
 
@@ -108,11 +108,6 @@
                     <label for="y_bin">Y binning (<div id="cy_bin"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ int(args['binning']['Y']) }} id="y_bin">
                     <button type="button" id="confccd" class="btn btn-primary btn-sm">Configure CCD</button>
-                    {% if args['status'] %}
-                        <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
-                    {% else %}
-                        <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
-                    {% end %}
                 </div>
             </div>
         </div>
@@ -121,6 +116,11 @@
                 <div class="form-inline">
                     <button type="button" id="confwfs" class="btn btn-primary btn-sm">Configure for WFS</button>
                     <button type="button" id="confdefault" class="btn btn-primary btn-sm">Default Configuration</button>
+                    {% if args['status'] %}
+                        <button type="button" id="connect" class="btn btn-success btn-sm">Reconnect</button>
+                    {% else %}
+                        <button type="button" id="connect" class="btn btn-danger btn-sm">Reconnect</button>
+                    {% end %}
                 </div>
             </div>
         </div>
