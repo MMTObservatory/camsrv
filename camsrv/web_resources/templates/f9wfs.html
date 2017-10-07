@@ -89,13 +89,13 @@
         <div class="row justify-content-left">
             <div class='col align-self-left'>
                 <div class="form-inline">
-                    <label for="frame_x">Lower X:</label>
+                    <label for="frame_x">Lower X (<div id="cframe_x"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ args['frame']['X'] }} id="frame_x">
-                    <label for="frame_y">Lower Y:</label>
+                    <label for="frame_y">Lower Y (<div id="cframe_y"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ args['frame']['Y'] }} id="frame_y">
-                    <label for="frame_w">Width:</label>
+                    <label for="frame_w">Width (<div id="cframe_w"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ args['frame']['width'] }} id="frame_w">
-                    <label for="frame_h">Height:</label>
+                    <label for="frame_h">Height (<div id="cframe_h"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ args['frame']['height'] }} id="frame_h">
                 </div>
             </div>
@@ -103,9 +103,9 @@
         <div class="row justify-content-left">
             <div class='col align-self-left'>
                 <div class="form-inline">
-                    <label for="x_bin">X binning:</label>
+                    <label for="x_bin">X binning (<div id="cx_bin"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ args['binning']['X'] }} id="x_bin">
-                    <label for="y_bin">Y binning:</label>
+                    <label for="y_bin">Y binning (<div id="cy_bin"></div>):</label>
                     <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ args['binning']['Y'] }} id="y_bin">
                     <button type="button" id="confccd" class="btn btn-primary btn-sm">Configure CCD</button>
                     {% if args['status'] %}
@@ -245,12 +245,12 @@
                             $("#connect").removeClass("btn-success");
                             $("#connect").addClass("btn-danger");
                         };
-                        $('#frame_x').val(data['frame']['X']);
-                        $('#frame_y').val(data['frame']['Y']);
-                        $('#frame_w').val(data['frame']['width']);
-                        $('#frame_h').val(data['frame']['height']);
-                        $('#x_bin').val(data['binning']['X']);
-                        $('#y_bin').val(data['binning']['Y']);
+                        $('#cframe_x').html(data['frame']['X']);
+                        $('#cframe_y').html(data['frame']['Y']);
+                        $('#cframe_w').html(data['frame']['width']);
+                        $('#cframe_h').html(data['frame']['height']);
+                        $('#cx_bin').html(data['binning']['X']);
+                        $('#cy_bin').html(data['binning']['Y']);
                     };
                     setTimeout(update, 5000);
                 });

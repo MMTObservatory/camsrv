@@ -96,4 +96,4 @@ class F9WFSsrv(CAMsrv):
         self.connect_camera()
 
         self.latest_image = None
-        self.requested_temp = -15.0
+        self.requested_temp = -25.0
