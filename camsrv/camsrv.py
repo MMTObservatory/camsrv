@@ -141,6 +141,8 @@ class CAMsrv(tornado.web.Application):
                 if cam.cooler == "Off":
                     log.info("Cooling off, turning on...")
                     cam.cooling_on()
+                    log.info("Setting set-point temperature to %f" % self.application.requested_temp)
+                    cam.temperature = self.application.requested_temp
                 else:
                     log.info("Cooling on, turning off...")
                     cam.cooling_off()
