@@ -69,6 +69,11 @@ HEADER_MAP = {
         'comment': "Parallactic Angle",
         'units': u.deg,
     },
+    'mount_mini_posang': {
+        'fitskey': "POSANG",
+        'comment': "Position Angle",
+        'units': u.deg,
+    },
     'mount_mini_uttime': {
         'fitskey': "UT",
         'comment': "UT of observation",
