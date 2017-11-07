@@ -100,6 +100,8 @@ class CAMsrv(tornado.web.Application):
             else:
                 log.warning("Camera not connected.")
 
+            self.finish()
+
     class LatestHandler(tornado.web.RequestHandler):
         """
         Serve up the latest image
@@ -111,6 +113,7 @@ class CAMsrv(tornado.web.Application):
                 self.application.latest_image.writeto(binout)
                 self.write(binout.getvalue())
                 binout.close()
+            self.finish()
 
     class ResetHandler(tornado.web.RequestHandler):
         """
@@ -121,6 +124,7 @@ class CAMsrv(tornado.web.Application):
             if cam is None:
                 log.info("Attemping to connect to camera...")
                 self.application.connect_camera()
+                self.finish()
             else:
                 try:
                     log.info("Disconnecting camera...")
@@ -130,6 +134,7 @@ class CAMsrv(tornado.web.Application):
                     cam = None
                 finally:
                     self.application.connect_camera()
+                    self.finish()
 
     class CoolingHandler(tornado.web.RequestHandler):
         """
@@ -146,6 +151,7 @@ class CAMsrv(tornado.web.Application):
                 else:
                     log.info("Cooling on, turning off...")
                     cam.cooling_off()
+            self.finish()
 
     class TemperatureHandler(tornado.web.RequestHandler):
         """
@@ -161,6 +167,7 @@ class CAMsrv(tornado.web.Application):
                 cam.temperature = t
             else:
                 log.warning("Unable to set camera temperature to %s" % temp)
+            self.finish()
 
     class CCDHandler(tornado.web.RequestHandler):
         """
@@ -183,6 +190,7 @@ class CAMsrv(tornado.web.Application):
                 }
                 cam.binning = bindict
                 cam.frame = framedict
+            self.finish()
 
     class StatusHandler(tornado.web.RequestHandler):
         """

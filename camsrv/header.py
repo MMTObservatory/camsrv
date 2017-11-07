@@ -35,19 +35,44 @@ HEADER_MAP = {
         'units': u.year,
     },
     'mount_mini_cat_id': {
-        'fitskey': "CAT_ID",
+        'fitskey': "CATID",
         'comment': "Catalog Source Name",
         'units': None,
     },
     'mount_mini_cat_ra2000': {
-        'fitskey': "RA_2000",
+        'fitskey': "CATRA2K",
         'comment': "Catalog RA (J2000)",
         'units': u.hourangle,
     },
     'mount_mini_cat_dec2000': {
-        'fitskey': "DEC_2000",
+        'fitskey': "CATDEC2K",
         'comment': "Catalog Dec (J2000)",
         'units': u.deg,
+    },
+    'mount_mini_cat_ra': {
+        'fitskey': "CATRA",
+        'comment': "Catalog RA",
+        'units': u.hourangle,
+    },
+    'mount_mini_cat_dec': {
+        'fitskey': "CATDEC",
+        'comment': "Catalog Dec",
+        'units': u.deg,
+    },
+    'mount_mini_cat_epoch': {
+        'fitskey': "CATEPOCH",
+        'comment': "Catalog Epoch",
+        'units': u.year,
+    },
+    'mount_mini_cat_rapm': {
+        'fitskey': "CATRAPM",
+        'comment': "Catalog RA proper motion",
+        'units': (u.hourangle / 3600.) / (100. * u.year),
+    },
+    'mount_mini_cat_decpm': {
+        'fitskey': "CATDECPM",
+        'comment': "Catalog Dec proper motion",
+        'units': u.arcsec / (100. * u.year)
     },
     'mount_mini_alt': {
         'fitskey': "EL",
@@ -68,6 +93,16 @@ HEADER_MAP = {
         'fitskey': "PA",
         'comment': "Parallactic Angle",
         'units': u.deg,
+    },
+    'mount_mini_posang': {
+        'fitskey': "POSANG",
+        'comment': "Position Angle",
+        'units': u.deg,
+    },
+    'mount_mini_mjd': {
+        'fitskey': 'MJD',
+        'comment': "Modified Julian Data at time of observation",
+        'units': u.day,
     },
     'mount_mini_uttime': {
         'fitskey': "UT",
@@ -90,38 +125,43 @@ HEADER_MAP = {
         'units': None,
     },
     'mount_mini_total_off_alt': {
-        'fitskey': "EL_OFF",
+        'fitskey': "ELOFF",
         'comment': "Total elevation offset",
         'units': u.arcsec,
     },
     'mount_mini_total_off_az': {
-        'fitskey': "AZ_OFF",
+        'fitskey': "AZOFF",
         'comment': "Total azimuth offset",
         'units': u.arcsec,
     },
     'mount_mini_total_off_ra': {
-        'fitskey': "RA_OFF",
+        'fitskey': "RAOFF",
         'comment': "Total RA offset",
         'units': u.arcsec,
     },
     'mount_mini_total_off_dec': {
-        'fitskey': "DEC_OFF",
+        'fitskey': "DECOFF",
         'comment': "Total Dec offset",
         'units': u.arcsec,
     },
     'mount_mini_instoff_az': {
-        'fitskey': "AZ_INST",
+        'fitskey': "IAZOFF",
         'comment': "Instrument Az offset",
         'units': u.arcsec,
     },
     'mount_mini_instoff_alt': {
-        'fitskey': "EL_INST",
+        'fitskey': "IELOFF",
         'comment': "Instrument El offset",
         'units': u.arcsec,
     },
+    'mount_mini_offroti': {
+        'fitskey': "IROTOFF",
+        'comment': "Instrument Rotator offset",
+        'units': u.deg,
+    },
     'hexapod_mini_curxyz_z': {
-        'fitskey': "FOCUS",
-        'comment': "Hexapod Focus (um)",
+        'fitskey': "TRANSZ",
+        'comment': "Hexapod Z Translation, i.e. Focus (um)",
         'units': u.micron,
     },
     'hexapod_mini_curxyz_y': {
@@ -160,7 +200,7 @@ HEADER_MAP = {
         'units': None,
     },
     'ds_atmospheric_pressure': {
-        'fitskey': "P_BARO",
+        'fitskey': "PRESSURE",
         'comment': "Barometric Pressure",
         'units': cds.mbar,
     },
@@ -276,6 +316,9 @@ def update_header(f=fits.hdu.image.PrimaryHDU()):
     data = get_api(keys)
 
     for k in keys:
-        header.append((HEADER_MAP[k]['fitskey'], data[k], HEADER_MAP[k]['comment']))
+        if k not in header:
+            header.append((HEADER_MAP[k]['fitskey'], data[k], HEADER_MAP[k]['comment']))
+        else:
+            header.comments[k] = HEADER_MAP[k]['comment']
 
     return f
