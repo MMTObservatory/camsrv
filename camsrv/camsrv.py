@@ -248,7 +248,9 @@ class CAMsrv(tornado.web.Application):
             nlines = self.get_argument('lines', default=10)
             snapshot = tracemalloc.take_snapshot()
             stats = snapshot.statistics('lineno')
-            top_stats = stats[:nlines]
+            top_stats = f"Top {nlines} lines of memory usage:\n"
+            for s in stats[:nlines]:
+                top_stats += f"\t{s}\n"
             self.write(top_stats)
             self.finish()
 
