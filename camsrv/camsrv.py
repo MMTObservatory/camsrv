@@ -2,35 +2,31 @@
 Base classes for MMTO camera interface systems
 """
 
-import os
 import io
 import socket
 import json
-import time
 import pkg_resources
 
 import logging
 import logging.handlers
-logger = logging.getLogger("")
-logger.setLevel(logging.INFO)
 
-try:
-    import tornado
-except ImportError:
-    raise RuntimeError("This server requires tornado.")
+import tornado
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 import tornado.websocket
 from tornado.log import enable_pretty_logging
-enable_pretty_logging()
 
 from pathlib import Path
 
-from sbigclient.sbigcam import MATCam, SimCam
+from sbigclient.sbigcam import SimCam
 
 from .header import update_header
 
+enable_pretty_logging()
+
+logger = logging.getLogger("")
+logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
@@ -212,7 +208,7 @@ class CAMsrv(tornado.web.Application):
             # make sure we can connect to camera and bail early if we can't
             if cam is not None:
                 try:
-                    connected = cam.connected
+                    cam.connected
                 except Exception as e:
                     log.error("Error checking camera connection: %s" % e)
                     cam = None
@@ -224,7 +220,8 @@ class CAMsrv(tornado.web.Application):
                 # don't always get the cooling power
                 try:
                     cooling_power = "%.1f" % cam.cooling_power
-                except:
+                except Exception as e:
+                    log.warning("Camera cooling power not available.")
                     cooling_power = "N/A"
 
                 status = {
