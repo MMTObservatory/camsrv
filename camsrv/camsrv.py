@@ -245,7 +245,7 @@ class CAMsrv(tornado.web.Application):
         Grab a snapshot of tracemalloc statistics
         """
         def get(self):
-            nlines = self.get_argument('lines', default=10)
+            nlines = int(self.get_argument('lines', default=10))
             snapshot = tracemalloc.take_snapshot()
             stats = snapshot.statistics('lineno')
             top_stats = f"Top {nlines} lines of memory usage:\n"
