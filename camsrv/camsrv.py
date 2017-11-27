@@ -7,6 +7,8 @@ import socket
 import json
 import pkg_resources
 
+import tracemalloc
+
 import logging
 import logging.handlers
 
@@ -22,6 +24,8 @@ from pathlib import Path
 from sbigclient.sbigcam import SimCam
 
 from .header import update_header
+
+tracemalloc.start()
 
 enable_pretty_logging()
 
@@ -234,6 +238,19 @@ class CAMsrv(tornado.web.Application):
                     'status': True,
                 }
             self.write(json.dumps(status))
+            self.finish()
+
+    class MallocHandler(tornado.web.RequestHandler):
+        """
+        Grab a snapshot of tracemalloc statistics
+        """
+        def get(self):
+            nlines = self.get_argument('lines', default=10)
+            snapshot = tracemalloc.take_snapshot()
+            stats = snapshot.statistics('lineno')
+            top_stats = stats[:nlines]
+            self.write(top_stats)
+            self.finish()
 
     def connect_camera(self):
         # check the actual camera
@@ -279,6 +296,7 @@ class CAMsrv(tornado.web.Application):
             (r"/status", self.StatusHandler),
             (r"/temperature", self.TemperatureHandler),
             (r"/ccdconf", self.CCDHandler),
+            (r"/profiler", self.MallocHandler),
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
