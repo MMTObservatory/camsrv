@@ -263,7 +263,7 @@ class CAMsrv(tornado.web.Application):
             stats = snapshot.statistics('traceback')
             hog_stats = stats[0]
             top_stats = f"Top memory usage of {hog_stats.count} blocks: {hog_stats.size/1024} KiB\n"
-            for l in hot_stats.traceback.format():
+            for l in hog_stats.traceback.format():
                 top_stats += f"\t{l}\n"
             self.write(top_stats)
             self.finish()
