@@ -260,7 +260,7 @@ class CAMsrv(tornado.web.Application):
         """
         def get(self):
             snapshot = tracemalloc.take_snapshot()
-            stats = snapshot.statistics('traceback')
+            stats = snapshot.statistics('lineno')
             hog_stats = stats[0]
             top_stats = f"Top memory usage of {hog_stats.count} blocks: {hog_stats.size/1024} KiB\n"
             for l in hog_stats.traceback.format():
