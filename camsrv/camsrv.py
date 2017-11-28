@@ -259,9 +259,17 @@ class CAMsrv(tornado.web.Application):
         Grab a snapshot of tracemalloc traceback for the biggest memory hog
         """
         def get(self):
+            snaptype = self.get_argument("snaptype", default="lineno")
+            n = int(self.get_argument("n", default=0))
             snapshot = tracemalloc.take_snapshot()
-            stats = snapshot.statistics('lineno')
-            hog_stats = stats[0]
+            try:
+                stats = snapshot.statistics(snaptype)
+                hog_stats = stats[n]
+            except Exception as e:
+                err = f"Error getting tracemalloc snapshot for snaptype={snaptype} and n={n}: {e}"
+                log.error(err)
+                self.write(err)
+                self.finish()
             top_stats = f"Top memory usage of {hog_stats.count} blocks: {hog_stats.size/1024} KiB\n"
             for l in hog_stats.traceback.format():
                 top_stats += f"\t{l}\n"
