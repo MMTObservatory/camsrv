@@ -25,7 +25,7 @@ from sbigclient.sbigcam import SimCam
 
 from .header import update_header
 
-tracemalloc.start()
+tracemalloc.start(25)
 
 enable_pretty_logging()
 
@@ -254,6 +254,20 @@ class CAMsrv(tornado.web.Application):
             self.write(top_stats)
             self.finish()
 
+    class MemHogHandler(tornado.web.RequestHandler):
+        """
+        Grab a snapshot of tracemalloc traceback for the biggest memory hog
+        """
+        def get(self):
+            snapshot = tracemalloc.take_snapshot()
+            stats = snapshot.statistics('traceback')
+            hog_stats = stats[0]
+            top_stats = f"Top memory usage of {stat.count} blocks: {stat.size/1024} KiB\n"
+            for l in hot_stats.traceback.format():
+                top_stats += f"\t{s}\n"
+            self.write(top_stats)
+            self.finish()
+
     def connect_camera(self):
         # check the actual camera
         self.camera = None
@@ -299,6 +313,7 @@ class CAMsrv(tornado.web.Application):
             (r"/temperature", self.TemperatureHandler),
             (r"/ccdconf", self.CCDHandler),
             (r"/profiler", self.MallocHandler),
+            (r"/memhog", self.MemHogHandler),
             (r"/js9/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path)),
             (r"/bootstrap/(.*)", tornado.web.StaticFileHandler, dict(path=bootstrap_path)),
             (r"/js9Prefs\.json(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9Prefs.json")),
