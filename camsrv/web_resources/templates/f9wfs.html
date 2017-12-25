@@ -170,14 +170,14 @@
                 $.get(url, function(data, status) {
                     var logstuff = data + status;
                     enable();
+                    cmap = JS9.GetColormap();
+                    JS9.CloseImage();
+                    JS9.Load("latest", {onload: function() {
+                        if (cmap != null) {
+                            JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                        };
+                    }});
                 });
-                cmap = JS9.GetColormap();
-                JS9.CloseImage();
-                JS9.Load("latest", {onload: function() {
-                    if (cmap != null) {
-                        JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-                    };
-                }});
             });
             $('#cooling').on('click', function() {
                 disable();
