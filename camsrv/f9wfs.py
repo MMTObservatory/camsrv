@@ -97,3 +97,4 @@ class F9WFSsrv(CAMsrv):
 
         self.latest_image = None
         self.requested_temp = -25.0
+        self.default_exptime = 10.0

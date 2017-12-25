@@ -81,7 +81,7 @@ class CAMsrv(tornado.web.Application):
             cam = self.application.camera
             exptype = self.get_argument('exptype', default="Light")
             filt = self.get_argument('filt', default=None)
-            exptime = self.get_argument('exptime', default=1.0)
+            exptime = self.get_argument('exptime', default=self.application.default_exptime)
 
             if cam is not None:
                 if filt is not None and filt in cam.filters:
@@ -304,6 +304,7 @@ class CAMsrv(tornado.web.Application):
 
         self.latest_image = None
         self.requested_temp = -15.0
+        self.default_exptime = 1.0
 
         self.settings = dict(
             template_path=template_path,
