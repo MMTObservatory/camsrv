@@ -185,8 +185,8 @@
             };
             function updateProgress(exp, i) {
                 if (i > 0) {
-                    percent = (exp - i) / exp
-                    $("#progress").css("width", percent.toString() + "%").text(percent.toString() + " %");
+                    percent = 100.0 * (exp - i) / exp
+                    $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
                     i = i - 0.1;
                     setTimeout(function() {updateProgress(exp, i)}, 100);
                 } else {
