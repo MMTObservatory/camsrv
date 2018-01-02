@@ -149,6 +149,10 @@
                     <button type="button" id="expose" class="btn btn-primary">Expose</button>
                 </form>
             </div>
+            <div class="progress" style="height: 20px;">
+                <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
         </div>
         <script>
             var busy = false;
@@ -191,7 +195,23 @@
                             JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
                         };
                     }});
+                    $(".progress-bar").css("width", "0%").text("");
+                    $(".progress-bar").removeClass("progress-bar-striped progress-bar-animated");
                 });
+                var i = parseFloat(exptime);
+                var exp = parseFloat(exptime);
+                function updateProgress() {
+                    if (i > 0) {
+                        percent = (exp - i) / exp
+                        $(".progress-bar").css("width", percent + "%").text(percent + " %");
+                        i = i - 0.1;
+                        setTimeout("updateProgress()", 100);
+                    } else {
+                        $(".progress-bar").css("width", "100%").text("Reading Out...");
+                        $(".progress-bar").addClass("progress-bar-striped progress-bar-animated");
+                    }
+                }
+                updateProgress();
             });
             $('#cooling').on('click', function() {
                 disable();
