@@ -95,13 +95,13 @@ class CAMsrv(tornado.web.Application):
                 hdulist = cam.expose(exptime=float(exptime), exptype=exptype)
                 if hdulist is not None:
                     hdulist = update_header(hdulist)
-                    if self.bad_pixel_mask is not None:
+                    if self.application.bad_pixel_mask is not None:
                         im = hdulist[0].data
-                        if im.shape != self.bad_pixel_mask.shape:
+                        if im.shape != self.application.bad_pixel_mask.shape:
                             log.warning("Wrong readout configuration for making bad pixel corrections...")
                         else:
                             blurred = median_filter(im, size=5)
-                            im[self.bad_pixel_mask] = blurred[self.bad_pixel_mask]
+                            im[self.application.bad_pixel_mask] = blurred[self.application.bad_pixel_mask]
                     self.application.latest_image = hdulist[0]
                     self.application.save_latest()
                 else:
