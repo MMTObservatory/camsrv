@@ -30,6 +30,9 @@
           margin-left: 15px;
           margin-right: 10px;
       }
+      .form-check label {
+          margin-left: 10px;
+      }
       .form-inline button {
           margin-left: 10px;
       }
@@ -216,6 +219,9 @@
                     }});
                     $("#progress").css("width", "0%").text("");
                     $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                    if ($('#continuous').prop("checked")) {
+                        $('#expose').trigger('click');
+                    };
                 });
                 var i = parseFloat(exptime);
                 var exp = parseFloat(exptime);
