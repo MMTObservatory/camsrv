@@ -182,7 +182,18 @@
                 $('#confwfs').prop("disabled", false);
                 $('#confdefault').prop("disabled", false);
                 busy = false;
-            }
+            };
+            function updateProgress(exp, i) {
+                if (i > 0) {
+                    percent = (exp - i) / exp
+                    $("#progress").css("width", percent.toString() + "%").text(percent.toString() + " %");
+                    i = i - 0.1;
+                    setTimeout(function() {updateProgress(exp, i)}, 100);
+                } else {
+                    $("#progress").css("width", "100%").text("Reading Out...");
+                    $("#progress").addClass("progress-bar-striped progress-bar-animated");
+                };
+            };
             $('#expose').on('click', function() {
                 disable();
                 var exptype = $('#exptype').val();
@@ -204,18 +215,7 @@
                 });
                 var i = parseFloat(exptime);
                 var exp = parseFloat(exptime);
-                function updateProgress() {
-                    if (i > 0) {
-                        percent = (exp - i) / exp
-                        $("#progress").css("width", percent.toString() + "%").text(percent.toString() + " %");
-                        i = i - 0.1;
-                        setTimeout("updateProgress()", 100);
-                    } else {
-                        $("#progress").css("width", "100%").text("Reading Out...");
-                        $("#progress").addClass("progress-bar-striped progress-bar-animated");
-                    }
-                }
-                updateProgress();
+                updateProgress(exp, i);
             });
             $('#cooling').on('click', function() {
                 disable();
