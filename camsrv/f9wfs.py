@@ -30,6 +30,8 @@ logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
+from astropy.io import fits
+
 from sbigclient.sbigcam import SimCam, F9WFSCam
 
 from .header import update_header
@@ -98,3 +100,6 @@ class F9WFSsrv(CAMsrv):
         self.latest_image = None
         self.requested_temp = -25.0
         self.default_exptime = 10.0
+
+        bp_file = pkg_resources.resource_filename(__name__, os.path.join("data", "f9_mask.fits"))
+        self.bad_pixel_mask = fits.open(bp_file)[0].data.astype(bool)

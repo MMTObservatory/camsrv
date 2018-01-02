@@ -7,6 +7,8 @@ import socket
 import json
 import pkg_resources
 
+from scipy.ndimage import median_filter
+
 import tracemalloc
 
 import logging
@@ -93,6 +95,13 @@ class CAMsrv(tornado.web.Application):
                 hdulist = cam.expose(exptime=float(exptime), exptype=exptype)
                 if hdulist is not None:
                     hdulist = update_header(hdulist)
+                    if self.bad_pixel_mask is not None:
+                        im = hdulist[0].data
+                        if im.shape != self.bad_pixel_mask.shape:
+                            log.warning("Wrong readout configuration for making bad pixel corrections...")
+                        else:
+                            blurred = median_filter(im, size=5)
+                            im[self.bad_pixel_mask] = blurred[self.bad_pixel_mask]
                     self.application.latest_image = hdulist[0]
                     self.application.save_latest()
                 else:
@@ -305,6 +314,8 @@ class CAMsrv(tornado.web.Application):
         self.latest_image = None
         self.requested_temp = -15.0
         self.default_exptime = 1.0
+
+        self.bad_pixel_mask = None
 
         self.settings = dict(
             template_path=template_path,
