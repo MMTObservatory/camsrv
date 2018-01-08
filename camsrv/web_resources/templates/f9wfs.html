@@ -176,11 +176,11 @@
                         <label for="exptime">Exposure Time (sec):</label>
                         <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=1.0 value=10.0 id="exptime">
                         <button type="button" id="expose" class="btn btn-primary">Expose</button>
-                        <label class="form-check-label"><label class="custom-control custom-checkbox">
+                        <!-- <label class="form-check-label"><label class="custom-control custom-checkbox">
                             <input id="continuous" type="checkbox" class="custom-control-input">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Continuous Exposure Loop</span>
-                        </label>
+                        </label> -->
                     </div>
                 </form>
             </div>
@@ -247,9 +247,9 @@
                     }});
                     $("#progress").css("width", "0%").text("");
                     $("#progress").removeClass("progress-bar-striped progress-bar-animated");
-                    if ($('#continuous').prop("checked")) {
-                        $('#expose').trigger('click');
-                    };
+                    // if ($('#continuous').prop("checked")) {
+                    //    $('#expose').trigger('click');
+                    // };
                 });
                 var i = parseFloat(exptime);
                 var exp = parseFloat(exptime);
