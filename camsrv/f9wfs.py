@@ -89,9 +89,11 @@ class F9WFSsrv(CAMsrv):
         self.home_template = "f9wfs.html"
 
         if 'WFSROOT' in os.environ:
-            self.savedir = Path(os.environ['WFSROOT'])
+            self.datadir = pathlib.Path(os.environ['WFSROOT'])
+        elif 'HOME' in os.environ:
+            self.datadir = pathlib.Path(os.environ['HOME']) / "wfsdat"
         else:
-            self.savedir = Path("/mmt/shwfs/datadir")
+            self.datadir = pathlib.Path("wfsdat")
 
         self.camera = None
 
