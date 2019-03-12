@@ -23,7 +23,7 @@ from tornado.log import enable_pretty_logging
 
 from pathlib import Path
 
-from sbigclient.sbigcam import SimCam
+from indiclient.indicam import SimCam
 
 from .header import update_header
 

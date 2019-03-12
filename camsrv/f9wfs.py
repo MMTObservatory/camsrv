@@ -32,7 +32,7 @@ log.setLevel(logging.INFO)
 
 from astropy.io import fits
 
-from sbigclient.sbigcam import SimCam, F9WFSCam
+from indiclient.indicam import SimCam, F9WFSCam
 
 from .header import update_header
 from .camsrv import CAMsrv
