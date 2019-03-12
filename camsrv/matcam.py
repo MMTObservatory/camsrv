@@ -44,7 +44,7 @@ class MATsrv(CAMsrv):
 
     def save_latest(self):
         if self.latest_image is not None:
-            filename = self.savedir / Path("matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
+            filename = self.datadir / Path("matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             self.latest_image.writeto(filename)
 
     def __init__(self):
@@ -53,9 +53,9 @@ class MATsrv(CAMsrv):
         self.home_template = "matcam.html"
 
         if 'MATCAMROOT' in os.environ:
-            self.savedir = Path(os.environ['MATCAMROOT'])
+            self.datadir = Path(os.environ['MATCAMROOT'])
         else:
-            self.savedir = Path("/mmt/matcam/latest")
+            self.datadir = Path("/mmt/matcam/latest")
 
         self.camera = None
 
