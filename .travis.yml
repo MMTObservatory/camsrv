@@ -65,10 +65,6 @@ matrix:
     fast_finish: true
 
     include:
-        # Try MacOS X
-        - os: osx
-          env: SETUP_CMD='test'
-
         # Do a coverage test.
         - os: linux
           env: SETUP_CMD='test --coverage'
@@ -78,17 +74,9 @@ matrix:
         #- os: linux
         #  env: SETUP_CMD='build_docs -w'
 
-        # Now try Astropy dev and LTS vesions with the latest 3.x
-        - os: linux
-          env: ASTROPY_VERSION=development
-               EVENT_TYPE='pull_request push cron'
+        # Now try astropy lts
         - os: linux
           env: ASTROPY_VERSION=lts
-
-        # Try numpy pre-release
-        - os: linux
-          env: NUMPY_VERSION=prerelease
-               EVENT_TYPE='pull_request push cron'
 
         # Do a PEP8 test with pycodestyle
         - os: linux
