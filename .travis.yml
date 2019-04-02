@@ -67,7 +67,7 @@ matrix:
     include:
         # Do a coverage test.
         - os: linux
-          env: SETUP_CMD='test --coverage'
+          env: SETUP_CMD='test'
 
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
