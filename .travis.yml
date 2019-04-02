@@ -67,7 +67,8 @@ matrix:
     include:
         # Do a coverage test.
         - os: linux
-          env: SETUP_CMD='test'
+          env: SETUP_CMD='test --coverage'
+               PIP_DEPENDENCIES='coverage codecov socketIO-client git+https://github.com/MMTObservatory/indiclient#egg=indiclient'
 
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
@@ -119,4 +120,4 @@ script:
 after_success:
     # If coveralls.io is set up for this package, uncomment the line below.
     # The coveragerc file may be customized as needed for your package.
-    # - if [[ $SETUP_CMD == *coverage* ]]; then coveralls --rcfile='mmtcam/tests/coveragerc'; fi
+    - if [[ $SETUP_CMD == *coverage* ]]; then codecov; fi
