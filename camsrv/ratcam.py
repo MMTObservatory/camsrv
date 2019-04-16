@@ -30,7 +30,7 @@ class RATsrv(CAMsrv):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = RATCam(host="192.168.2.4", port=7624)
+            self.camera = RATCam(host="ratcam.mmto.arizona.edu", port=7624)
             self.camera.driver = "SBIG ST-I"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to ratcam host. Falling back to test server...")
