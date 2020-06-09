@@ -34,6 +34,7 @@ docs/_build
 .flooignore
 
 # Packages/installer info
+.eggs/
 *.egg
 *.egg-info
 dist
@@ -55,6 +56,7 @@ distribute-*.tar.gz
 .project
 .pydevproject
 .settings
+.vscode/
 
 # Mac OSX
 .DS_Store
