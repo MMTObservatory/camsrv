@@ -34,6 +34,7 @@ docs/_build
 .flooignore
 
 # Packages/installer info
+pip-wheel-metadata/
 .eggs/
 *.egg
 *.egg-info
