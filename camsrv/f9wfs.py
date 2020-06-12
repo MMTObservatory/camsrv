@@ -3,39 +3,33 @@ MMTO F/9 WFS camera interface
 """
 
 import os
-import io
 import socket
-import json
 import time
 import pkg_resources
 
-try:
-    import tornado
-except ImportError:
-    raise RuntimeError("This server requires tornado.")
-
+import tornado
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 import tornado.websocket
 from tornado.log import enable_pretty_logging
-enable_pretty_logging()
 
 from pathlib import Path
 
 import logging
 import logging.handlers
-logger = logging.getLogger("")
-logger.setLevel(logging.INFO)
-log = logging.getLogger('tornado.application')
-log.setLevel(logging.INFO)
 
 from astropy.io import fits
 
 from indiclient.indicam import SimCam, F9WFSCam
 
-from .header import update_header
 from .camsrv import CAMsrv
+
+enable_pretty_logging()
+logger = logging.getLogger("")
+logger.setLevel(logging.INFO)
+log = logging.getLogger('tornado.application')
+log.setLevel(logging.INFO)
 
 F9WFSPORT = 8787
 

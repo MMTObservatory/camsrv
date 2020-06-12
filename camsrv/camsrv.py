@@ -235,7 +235,7 @@ class CAMsrv(tornado.web.Application):
                 # don't always get the cooling power
                 try:
                     cooling_power = "%.1f" % cam.cooling_power
-                except Exception as e:
+                except Exception:
                     log.warning("Camera cooling power not available.")
                     cooling_power = "N/A"
 
@@ -282,8 +282,8 @@ class CAMsrv(tornado.web.Application):
                 self.write(err)
                 self.finish()
             top_stats = f"Top memory usage of {hog_stats.count} blocks: {hog_stats.size/1024} KiB\n"
-            for l in hog_stats.traceback.format():
-                top_stats += f"\t{l}\n"
+            for ll in hog_stats.traceback.format():
+                top_stats += f"\t{ll}\n"
             self.write(top_stats)
             self.finish()
 

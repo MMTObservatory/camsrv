@@ -3,18 +3,15 @@ Utilities for querying MMT systems to get information to include in image header
 """
 
 import json
-from urllib.parse import urlencode
-
 import urllib3
-urllib3.disable_warnings()
 
 import redis
 
 import astropy.units as u
 from astropy.units import cds
-from astropy.coordinates import Angle
 from astropy.io import fits
 
+urllib3.disable_warnings()
 API_HOST = "https://api.mmto.arizona.edu/APIv1"
 REDIS_HOST = "ops.mmto.arizona.edu"
 

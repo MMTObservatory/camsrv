@@ -3,25 +3,24 @@ MMTO Rotator Aligment Telescope interface
 """
 
 import os
-import io
 import socket
-import json
 import time
-import pkg_resources
 
 from pathlib import Path
 
+import tornado
+
 import logging
 import logging.handlers
+
+from indiclient.indicam import SimCam, RATCam
+
+from .camsrv import CAMsrv
+
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
-
-from indiclient.indicam import SimCam, RATCam
-
-from .header import update_header
-from .camsrv import CAMsrv
 
 RATCAMPORT = 8789
 
