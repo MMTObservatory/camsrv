@@ -37,6 +37,8 @@ from indiclient.indicam import SimCam, F9WFSCam
 from .header import update_header
 from .camsrv import CAMsrv
 
+F9WFSPORT = 8787
+
 
 class F9WFSsrv(CAMsrv):
     class WFSModeHandler(tornado.web.RequestHandler):
@@ -105,3 +107,19 @@ class F9WFSsrv(CAMsrv):
 
         bp_file = pkg_resources.resource_filename(__name__, os.path.join("data", "f9_mask.fits"))
         self.bad_pixel_mask = fits.open(bp_file)[0].data.astype(bool)
+
+
+def main(port=F9WFSPORT):
+    application = F9WFSsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"F/9 WFS camera server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=F9WFSPORT)

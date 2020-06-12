@@ -23,6 +23,8 @@ from indiclient.indicam import SimCam, MATCam
 from .header import update_header
 from .camsrv import CAMsrv
 
+MATCAMPORT = 8786
+
 
 class MATsrv(CAMsrv):
 
@@ -63,3 +65,19 @@ class MATsrv(CAMsrv):
 
         self.latest_image = None
         self.requested_temp = -15.0
+
+
+def main(port=MATCAMPORT):
+    application = MATsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"MATcam server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=MATCAMPORT)

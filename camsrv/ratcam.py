@@ -23,6 +23,8 @@ from indiclient.indicam import SimCam, RATCam
 from .header import update_header
 from .camsrv import CAMsrv
 
+RATCAMPORT = 8789
+
 
 class RATsrv(CAMsrv):
 
@@ -62,3 +64,19 @@ class RATsrv(CAMsrv):
         self.connect_camera()
 
         self.latest_image = None
+
+
+def main(port=RATCAMPORT):
+    application = RATsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"RATcam server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=RATCAMPORT)

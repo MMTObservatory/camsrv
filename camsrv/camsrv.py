@@ -36,6 +36,8 @@ logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
+SIMSRVPORT = 8788
+
 
 class CAMsrv(tornado.web.Application):
     class HomeHandler(tornado.web.RequestHandler):
@@ -351,3 +353,19 @@ class CAMsrv(tornado.web.Application):
             self.handlers.extend(self.extra_handlers)
 
         super(CAMsrv, self).__init__(self.handlers, **self.settings)
+
+
+def main(port=SIMSRVPORT):
+    application = CAMsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"Simulator server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=SIMSRVPORT)
