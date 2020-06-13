@@ -31,7 +31,7 @@ class RATsrv(CAMsrv):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = RATCam(host="192.168.2.4", port=7624)
+            self.camera = RATCam(host=self.camhost, port=self.camport)
             self.camera.driver = "SBIG ST-I"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to ratcam host. Falling back to test server...")
@@ -48,8 +48,8 @@ class RATsrv(CAMsrv):
             filename = self.datadir / Path("ratcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             self.latest_image.writeto(filename)
 
-    def __init__(self):
-        super(RATsrv, self).__init__()
+    def __init__(self, camhost="192.168.2.4", camport=7624, connect=True):
+        super(RATsrv, self).__init__(camhost=camhost, camport=camport, connect=connect)
 
         self.home_template = "ratcam.html"
 
@@ -57,10 +57,6 @@ class RATsrv(CAMsrv):
             self.datadir = Path(os.environ['MATCAMROOT'])
         else:
             self.datadir = Path("/mmt/matcam/latest")
-
-        self.camera = None
-
-        self.connect_camera()
 
         self.latest_image = None
 
