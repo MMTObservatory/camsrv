@@ -45,35 +45,37 @@ class CAMsrv(tornado.web.Application):
         Serves the main HTML page.
         """
         def get(self):
-            args = {
-                'filter': "N/A",
-                'filters': ["N/A"],
-                'frame_types': ["N/A"],
-                'cooling': "Off",
-                'temperature': "N/A",
-                'cooling_power': "N/A",
-                'requested_temp': self.application.requested_temp,
-                'binning': {'X': "N/A", 'Y': "N/A"},
-                'frame': {'X': "N/A", 'Y': "N/A", "width": "N/A", "height": "N/A"},
-                'ccdinfo': {'CCD_MAX_X': 1280, 'CCD_MAX_Y': 1024},
-                'status': False,
-            }
-            try:
+            if self.application.camera is None:
                 args = {
-                    'filter': self.application.camera.filter,
-                    'filters': self.application.camera.filters,
-                    'frame_types': self.application.camera.frame_types,
-                    'cooling': self.application.camera.cooler,
-                    'temperature': self.application.camera.temperature,
-                    'cooling_power': self.application.camera.cooling_power,
+                    'filter': "N/A",
+                    'filters': ["N/A"],
+                    'frame_types': ["N/A"],
+                    'cooling': "Off",
+                    'temperature': "N/A",
+                    'cooling_power': "N/A",
                     'requested_temp': self.application.requested_temp,
-                    'binning': self.application.camera.binning,
-                    'frame': self.application.camera.frame,
-                    'ccdinfo': self.application.camera.ccd_info,
-                    'status': True,
+                    'binning': {'X': 1, 'Y': 1},
+                    'frame': {'X': 0, 'Y': 0, "width": 1280, "height": 1024},
+                    'ccdinfo': {'CCD_MAX_X': 1280, 'CCD_MAX_Y': 1024},
+                    'status': False,
                 }
-            except Exception as e:
-                log.error("Can't load configuration from camera: %s" % e)
+            else:
+                try:
+                    args = {
+                        'filter': self.application.camera.filter,
+                        'filters': self.application.camera.filters,
+                        'frame_types': self.application.camera.frame_types,
+                        'cooling': self.application.camera.cooler,
+                        'temperature': self.application.camera.temperature,
+                        'cooling_power': self.application.camera.cooling_power,
+                        'requested_temp': self.application.requested_temp,
+                        'binning': self.application.camera.binning,
+                        'frame': self.application.camera.frame,
+                        'ccdinfo': self.application.camera.ccd_info,
+                        'status': True,
+                    }
+                except Exception as e:
+                    log.error("Can't load configuration from camera: %s" % e)
 
             self.render(self.application.home_template, args=args)
 
@@ -291,7 +293,7 @@ class CAMsrv(tornado.web.Application):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = SimCam(host="localhost", port=7624)
+            self.camera = SimCam(host=self.camhost, port=self.camport)
             self.camera.driver = "CCD Simulator"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to INDI CCD Simulator...")
@@ -299,19 +301,23 @@ class CAMsrv(tornado.web.Application):
     def save_latest(self):
         pass
 
-    def __init__(self):
+    def __init__(self, camhost="localhost", camport=7624, connect=True):
         parent = Path(pkg_resources.resource_filename(__name__, "web_resources"))
         template_path = parent / "templates"
         static_path = parent / "static"
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
 
+        self.camhost = camhost
+        self.camport = camport
+
         self.parent = parent
         self.home_template = "sim.html"
 
         self.camera = None
 
-        self.connect_camera()
+        if connect:
+            self.connect_camera()
 
         self.latest_image = None
         self.requested_temp = -15.0
