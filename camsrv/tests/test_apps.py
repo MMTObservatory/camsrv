@@ -1,15 +1,12 @@
 """
 Sanity checks to make sure applications can be instantiated
 """
-import tornado
 from tornado.testing import AsyncHTTPTestCase, gen_test
-import time
-import signal
 
-from ..camsrv import CAMsrv, SIMSRVPORT
-from ..f9wfs import F9WFSsrv, F9WFSPORT
-from ..matcam import MATsrv, MATCAMPORT
-from ..ratcam import RATsrv, RATCAMPORT
+from ..camsrv import CAMsrv
+from ..f9wfs import F9WFSsrv
+from ..matcam import MATsrv
+from ..ratcam import RATsrv
 
 
 class TestSimSrv(AsyncHTTPTestCase):

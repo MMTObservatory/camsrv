@@ -33,6 +33,8 @@ log.setLevel(logging.INFO)
 
 F9WFSPORT = 8787
 
+__all__ = ['F9WFSsrv', 'main']
+
 
 class F9WFSsrv(CAMsrv):
     class WFSModeHandler(tornado.web.RequestHandler):

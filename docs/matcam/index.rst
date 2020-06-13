@@ -7,4 +7,11 @@ This is the documentation for MATcam.
 Reference/API
 =============
 
-.. automodapi:: matcam
+.. automodapi:: camsrv
+    :no-inheritance-diagram:
+
+.. automodapi:: camsrv.camsrv
+    :no-inheritance-diagram:
+
+.. automodapi:: camsrv.matcam
+    :no-inheritance-diagram:

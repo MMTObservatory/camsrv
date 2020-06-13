@@ -24,6 +24,8 @@ log.setLevel(logging.INFO)
 
 MATCAMPORT = 8786
 
+__all__ = ['MATsrv', 'main']
+
 
 class MATsrv(CAMsrv):
 

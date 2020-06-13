@@ -38,6 +38,8 @@ log.setLevel(logging.INFO)
 
 SIMSRVPORT = 8788
 
+__all__ = ['CAMsrv', 'main']
+
 
 class CAMsrv(tornado.web.Application):
     class HomeHandler(tornado.web.RequestHandler):

@@ -24,6 +24,8 @@ log.setLevel(logging.INFO)
 
 RATCAMPORT = 8789
 
+__all__ = ['RATsrv', 'main']
+
 
 class RATsrv(CAMsrv):
 
