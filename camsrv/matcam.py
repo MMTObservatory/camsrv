@@ -3,25 +3,28 @@ MMTO Mount Aligment Telescope interface
 """
 
 import os
-import io
 import socket
-import json
 import time
-import pkg_resources
 
 from pathlib import Path
 
+import tornado
+
 import logging
 import logging.handlers
+
+from indiclient.indicam import SimCam, MATCam
+
+from .camsrv import CAMsrv
+
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
-from indiclient.indicam import SimCam, MATCam
+MATCAMPORT = 8786
 
-from .header import update_header
-from .camsrv import CAMsrv
+__all__ = ['MATsrv', 'main']
 
 
 class MATsrv(CAMsrv):
@@ -30,7 +33,7 @@ class MATsrv(CAMsrv):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = MATCam(host="matcam", port=7624)
+            self.camera = MATCam(host=self.camhost, port=self.camport)
             self.camera.driver = "SBIG CCD"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to matcam host. Falling back to test server...")
@@ -38,7 +41,7 @@ class MATsrv(CAMsrv):
         # fall back to the test simulator server
         if self.camera is None:
             try:
-                self.camera = SimCam(host="localhost", port=7624)
+                self.camera = SimCam(host="localhost", port=self.camport)
             except (ConnectionRefusedError, socket.gaierror):
                 log.error("Connection refused to local test server as well...")
 
@@ -47,8 +50,8 @@ class MATsrv(CAMsrv):
             filename = self.datadir / Path("matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             self.latest_image.writeto(filename)
 
-    def __init__(self):
-        super(MATsrv, self).__init__()
+    def __init__(self, camhost="matcam", camport=7624, connect=True):
+        super(MATsrv, self).__init__(camhost=camhost, camport=camport, connect=connect)
 
         self.home_template = "matcam.html"
 
@@ -57,9 +60,21 @@ class MATsrv(CAMsrv):
         else:
             self.datadir = Path("/mmt/matcam/latest")
 
-        self.camera = None
-
-        self.connect_camera()
-
         self.latest_image = None
         self.requested_temp = -15.0
+
+
+def main(port=MATCAMPORT):
+    application = MATsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"MATcam server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=MATCAMPORT)

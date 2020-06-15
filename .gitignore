@@ -34,6 +34,8 @@ docs/_build
 .flooignore
 
 # Packages/installer info
+pip-wheel-metadata/
+.eggs/
 *.egg
 *.egg-info
 dist
@@ -55,6 +57,7 @@ distribute-*.tar.gz
 .project
 .pydevproject
 .settings
+.vscode/
 
 # Mac OSX
 .DS_Store

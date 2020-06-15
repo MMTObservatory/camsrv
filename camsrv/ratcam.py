@@ -3,25 +3,28 @@ MMTO Rotator Aligment Telescope interface
 """
 
 import os
-import io
 import socket
-import json
 import time
-import pkg_resources
 
 from pathlib import Path
 
+import tornado
+
 import logging
 import logging.handlers
+
+from indiclient.indicam import SimCam, RATCam
+
+from .camsrv import CAMsrv
+
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
-from indiclient.indicam import SimCam, RATCam
+RATCAMPORT = 8789
 
-from .header import update_header
-from .camsrv import CAMsrv
+__all__ = ['RATsrv', 'main']
 
 
 class RATsrv(CAMsrv):
@@ -30,7 +33,7 @@ class RATsrv(CAMsrv):
         # check the actual camera
         self.camera = None
         try:
-            self.camera = RATCam(host="ratcam.mmto.arizona.edu", port=7624)
+            self.camera = RATCam(host=self.camhost, port=self.camport)
             self.camera.driver = "SBIG ST-I"
         except (ConnectionRefusedError, socket.gaierror):
             log.warning("Can't connect to ratcam host. Falling back to test server...")
@@ -47,8 +50,8 @@ class RATsrv(CAMsrv):
             filename = self.datadir / Path("ratcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             self.latest_image.writeto(filename)
 
-    def __init__(self):
-        super(RATsrv, self).__init__()
+    def __init__(self, camhost="192.168.2.4", camport=7624, connect=True):
+        super(RATsrv, self).__init__(camhost=camhost, camport=camport, connect=connect)
 
         self.home_template = "ratcam.html"
 
@@ -57,8 +60,20 @@ class RATsrv(CAMsrv):
         else:
             self.datadir = Path("/mmt/matcam/latest")
 
-        self.camera = None
-
-        self.connect_camera()
-
         self.latest_image = None
+
+
+def main(port=RATCAMPORT):
+    application = RATsrv()
+
+    http_server = tornado.httpserver.HTTPServer(application)
+    http_server.listen(port)
+
+    print(f"RATcam server running at http://127.0.0.1:{port}/")
+    print("Press Ctrl+C to quit")
+
+    tornado.ioloop.IOLoop.instance().start()
+
+
+if __name__ == "__main__":
+    main(port=RATCAMPORT)
