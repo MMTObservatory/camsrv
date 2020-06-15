@@ -8,8 +8,13 @@ front and back end interfaces to all camera systems used at the MMTO.
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
+.. image:: https://github.com/MMTObservatory/camsrv/workflows/Python%20Tests/badge.svg
+    :target: https://github.com/MMTObservatory/camsrv/actions
+    :alt: Python Tests
 
-
+.. image:: https://codecov.io/gh/MMTObservatory/camsrv/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/MMTObservatory/camsrv
+    :alt: Codecov Report
 
 License
 -------
