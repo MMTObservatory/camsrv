@@ -168,7 +168,6 @@ class CAMsrv(tornado.web.Application):
                     cam.cooling_off()
             self.finish()
 
-
     class DisconnectHandler(tornado.web.RequestHandler):
         """
         Disconnect the camera from the INDI server
@@ -178,7 +177,6 @@ class CAMsrv(tornado.web.Application):
             self.application.camera = None
             log.info("Disconnected camera from INDI server.")
             self.finish()
-
 
     class TemperatureHandler(tornado.web.RequestHandler):
         """
