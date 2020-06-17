@@ -168,6 +168,16 @@ class CAMsrv(tornado.web.Application):
                     cam.cooling_off()
             self.finish()
 
+    class DisconnectHandler(tornado.web.RequestHandler):
+        """
+        Disconnect the camera from the INDI server
+        """
+        def get(self):
+            self.application.camera.quit()
+            self.application.camera = None
+            log.info("Disconnected camera from INDI server.")
+            self.finish()
+
     class TemperatureHandler(tornado.web.RequestHandler):
         """
         Set the set-point temperature of the CCD cooler
@@ -336,6 +346,7 @@ class CAMsrv(tornado.web.Application):
         self.handlers = [
             (r"/", self.HomeHandler),
             (r"/expose", self.ExposureHandler),
+            (r"/disconnect", self.DisconnectHandler),
             (r"/latest", self.LatestHandler),
             (r"/cooling", self.CoolingHandler),
             (r"/reset", self.ResetHandler),
