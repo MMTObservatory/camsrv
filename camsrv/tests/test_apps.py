@@ -20,6 +20,20 @@ class TestSimSrv(AsyncHTTPTestCase):
         self.assertEqual(response.code, 200)
 
 
+class TestConnected(AsyncHTTPTestCase):
+    def get_app(self):
+        app = CAMsrv(connect=True)
+        return app
+
+    def test_read_then_disconnect(self):
+        response = self.fetch('/status')
+        self.assertEqual(response.code, 200)
+        self.assertIn(b"temperature", response.body)
+
+        response = self.fetch('/disconnect')
+        self.assertEqual(response.code, 200)
+
+
 class TestF9Srv(TestSimSrv):
     def get_app(self):
         app = F9WFSsrv(connect=False)
