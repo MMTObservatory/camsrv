@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+    f9wfs:
+        image: mmtobservatory/camsrv:latest
+        volumes:
+            - /home/mmtop/wfsdat:/camsrv
+    matcam:
+        image: mmtobservatory/camsrv:latest
+        volumes:
+            - /mmt/matcam/latest:/camsrv
+    ratcam:
+        image: mmtobservatory/camsrv:latest
+        volumes:
+            - /mmt/matcam/latest:/camsrv

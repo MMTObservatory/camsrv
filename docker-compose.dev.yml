@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+    f9wfs:
+        build: .
+        volumes:
+            - ${CAMSRV}:/camsrv
+    matcam:
+        build: .
+        volumes:
+            - ${CAMSRV}:/camsrv
+    ratcam:
+        build: .
+        volumes:
+            - ${CAMSRV}:/camsrv
