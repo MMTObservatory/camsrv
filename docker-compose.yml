@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+    f9wfs:
+        ports:
+            - 8787:8787
+        command: ["f9wfs"]
+    matcam:
+        ports:
+            - 8786:8786
+        command: ["matcam"]
+    ratcam:
+        ports:
+            - 8789:8789
+        command: ["ratcam"]
