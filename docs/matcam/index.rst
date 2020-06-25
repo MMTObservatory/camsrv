@@ -12,6 +12,3 @@ Reference/API
 
 .. automodapi:: camsrv.camsrv
     :no-inheritance-diagram:
-
-.. automodapi:: camsrv.matcam
-    :no-inheritance-diagram:
