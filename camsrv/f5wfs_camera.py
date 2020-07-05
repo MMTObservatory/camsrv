@@ -11,7 +11,7 @@ from astropy.io import fits
 from saomsg.client import MSGClient
 
 logger = logging.getLogger("")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class CamState(Enum):
@@ -44,8 +44,6 @@ class ExpType(Enum):
 class F5WFS_Cam(MSGClient):
     def __init__(self, host="localhost", port=6868):
         super(F5WFS_Cam, self).__init__(host=host, port=port)
-        self.observer = "F5/Hecto Shack-Hartmann Wavefront Sensor"
-        self.object = "N/A"
 
     @property
     def ccd_info(self):
@@ -66,34 +64,6 @@ class F5WFS_Cam(MSGClient):
         Query connection status
         """
         return self.running
-
-    @property
-    def observer(self):
-        """
-        Get observer string
-        """
-        return self.observer
-
-    @observer.setter
-    def observer(self, obsstring):
-        """
-        Set observer string
-        """
-        self.observer = obsstring
-
-    @property
-    def object(self):
-        """
-        Get object string
-        """
-        return self.object
-
-    @object.setter
-    def object(self, objstring):
-        """
-        Set object string
-        """
-        self.object = objstring
 
     @property
     async def temperature(self):
@@ -123,7 +93,7 @@ class F5WFS_Cam(MSGClient):
     async def timer(self):
         """
         Read camera timer from the MSG server
-        """"
+        """
         timer = await self.get("timer")
         return int(timer)
 
@@ -164,7 +134,7 @@ class F5WFS_Cam(MSGClient):
             logging.error("Problem sending abort command.")
         return status
 
-    async def expose(self, exptype, exptime, nbytes=1322240):
+    async def expose(self, exptime, exptype=ExpType.light):
         """
         Acquire an exposure, read it out, and return a FITS object
         """
@@ -177,10 +147,11 @@ class F5WFS_Cam(MSGClient):
                 await asyncio.sleep(0.5)
         else:
             logging.error("Exposure command failed")
-            return
+            status = await self.idle()
+            return status
 
         logging.debug("Exposure complete. Beginning readout...")
-        status = await selt.run("readout")
+        status = await self.run("readout")
         if status:
             while True:
                 if await self.state == CamState.Read:
@@ -188,21 +159,30 @@ class F5WFS_Cam(MSGClient):
                 await asyncio.sleep(0.5)
         else:
             logging.error("Readout command failed")
-            return
+            status = await self.idle()
+            return status
 
         logging.debug("Readout complete. Transferring FITS data...")
-        status = await self.run("fits", 0, nbytes)
-        if status:
-            rawreply = await self.reader.readline()
-            reply_data = rawreply.decode().split()
-            if reply_data[1] == 'blk' and reply_data[2] == nbytes:
-                logging.debug(f"Ready to transfer {nbytes} of FITS data")
-                fits_blob = await self.reader.read(nbytes)
-                hdulist = fits.open(io.BytesIO(fits_blob))
-                return hdulist
-            else:
-                logging.error(f"Failed reply to fits command: {reply_data}")
-                return
+        fits_msg = "1 fits 0 1322240\n"
+        self.writer.write(fits_msg.encode())
+        await self.writer.drain()
+
+        rawreply = await self.reader.readline()
+        reply_data = rawreply.decode().split()
+        if reply_data[1] == 'blk':
+            nbytes = int(reply_data[2])
+            logging.debug(f"Ready to transfer {nbytes} of FITS data")
+            fits_blob = await self.reader.readexactly(nbytes)
+            hdulist = fits.open(io.BytesIO(fits_blob))
+            status = await self.idle()
+            hdr = hdulist[0].header
+            hdr['CAMTEMP'] = await self.temperature
+            hdr['CAMSETP'] = await self.setpoint
+            return hdulist
         else:
-            logging.error("FITS command failed")
-            return
+            logging.error(f"Failed reply to fits command: {reply_data}")
+            status = await self.idle()
+            return status
+
+        status = await self.idle()
+        return status
