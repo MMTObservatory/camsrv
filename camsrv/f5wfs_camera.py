@@ -163,11 +163,14 @@ class F5WFS_Cam(MSGClient):
             return status
 
         logging.debug("Readout complete. Transferring FITS data...")
+        # the 0 isn't used and the 1322240 is a maximum expected nbytes. the actual
+        # nbytes of the image data are sent in the reply.
         fits_msg = "1 fits 0 1322240\n"
         self.writer.write(fits_msg.encode())
         await self.writer.drain()
 
         rawreply = await self.reader.readline()
+        # pull the first line to parse out how many bytes we need to read
         reply_data = rawreply.decode().split()
         if reply_data[1] == 'blk':
             nbytes = int(reply_data[2])
