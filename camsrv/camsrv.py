@@ -79,7 +79,10 @@ class CAMsrv(tornado.web.Application):
                 except Exception as e:
                     log.error("Can't load configuration from camera: %s" % e)
 
-            self.render(self.application.home_template, args=args)
+            if not hasattr(self.application, "indiargs"):
+                self.application.indiargs = {}
+
+            self.render(self.application.home_template, args=args, **self.application.indiargs)
 
     class ExposureHandler(tornado.web.RequestHandler):
         """
