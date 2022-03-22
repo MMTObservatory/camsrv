@@ -22,7 +22,6 @@ import logging.handlers
 from astropy.io import fits
 import io
 
-from indiclient.indicam import SimCam, F9WFSCam
 
 from .sbig import SBIGClient
 from pyindi.webclient import INDIWebApp
@@ -40,7 +39,7 @@ log.setLevel(logging.INFO)
 
 from .header import update_header
 
-F9WFSPORT = 8787
+F5WFSPORT = 8989
 
 __all__ = ['F5WFSsrv', 'main']
 
@@ -54,7 +53,7 @@ class F5WFSsrv(CAMsrv):
         """
         def get(self):
             cam = self.application.camera
-            log.info("Configuring f/9 WFS camera for WFS observations...")
+            log.info("Configuring f/5 WFS camera for WFS observations...")
             cam.wfs_config()
 
     class DefaultModeHandler(tornado.web.RequestHandler):
@@ -63,34 +62,13 @@ class F5WFSsrv(CAMsrv):
         """
         def get(self):
             cam = self.application.camera
-            log.info("Setting f/9 WFS camera to its default configuration, full-frame with 1x1 binning...")
+            log.info("Setting f/5 WFS camera to its default configuration, full-frame with 1x1 binning...")
             cam.default_config()
 
-    def connect_camera_old(self):
-        # check the actual camera
-        self.camera = None
-        try:
-            self.camera = F9WFSCam(host=self.camhost, port=self.camport)
-            self.camera.driver = "SBIG CCD"
-        except (ConnectionRefusedError, socket.gaierror):
-            log.warning("Can't connect to f9wfs camera host. Falling back to test server...")
-
-        # fall back to the test simulator server
-        if self.camera is None:
-            try:
-                self.camera = SimCam(host="indiserver", port=self.camport)
-            except (ConnectionRefusedError, socket.gaierror):
-                log.error("Connection refused to local test server as well...")
 
     def connect_camera(self):
+        """Camera connection to indidriver is done by javascript"""
         return
-        self.que.put_nowait(
-                self.sbig.setSimulation(True)
-                )
-
-        self.que.put_nowait(
-                    self.sbig.connect(True)
-                )
 
     def save_latest(self):
         if self.latest_image is not None:
@@ -103,7 +81,7 @@ class F5WFSsrv(CAMsrv):
             (r"/default_config", self.DefaultModeHandler),
         ]
 
-        iwa = INDIWebApp(handle_blob=self.new_image, indihost="indiserver", indiport=7624)
+        iwa = INDIWebApp(handle_blob=self.new_image, indihost="localhost", indiport=7624)
         self.extra_handlers.extend(iwa.indi_handlers())
         self.indiargs = {"device_name":["*"]}
 
@@ -149,7 +127,7 @@ class F5WFSsrv(CAMsrv):
 
 
 
-def main(port=F9WFSPORT):
+def main(port=F5WFSPORT):
     application = F5WFSsrv()
 
     
