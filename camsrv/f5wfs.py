@@ -23,7 +23,6 @@ from astropy.io import fits
 import io
 
 
-from .sbig import SBIGClient
 from pyindi.webclient import INDIWebApp
 import base64
 
@@ -35,7 +34,7 @@ logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 import asyncio
 log.setLevel(logging.INFO)
-
+import socket
 
 from .header import update_header
 
@@ -66,22 +65,55 @@ class F5WFSsrv(CAMsrv):
             cam.default_config()
 
 
+    class ResetDriverHandler(tornado.web.RequestHandler):
+
+        async def get(self):
+            
+            reader, writer = await asyncio.open_connection(
+                            'wfs-dev.mmto.arizona.edu', 5400)
+
+            writer.write(b"restart")
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+            self.finish("done")
+
+
+    class ImagePathHandler(tornado.web.RequestHandler):
+
+        def get(self):
+            path = self.get_argument("path", None)
+            if path is not None:
+                datadir = Path(path)
+                if not datadir.exists():
+                    raise ValueError("path does not exist {datadir}")
+                self.application.datadir = datadir
+
+            self.finish(str(self.application.datadir))
+                
+                
+
     def connect_camera(self):
         """Camera connection to indidriver is done by javascript"""
         return
 
     def save_latest(self):
+        log.info("Saving latest")
         if self.latest_image is not None:
-            filename = self.datadir / Path("f9wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
+
+            filename = self.datadir / Path("f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
+            log.info(f"saving to {filename}")
             self.latest_image.writeto(filename)
 
     def __init__(self, camhost='badname', camport=7624, connect=False):
         self.extra_handlers = [
             (r"/wfs_config", self.WFSModeHandler),
             (r"/default_config", self.DefaultModeHandler),
+            (r"/restart_indidriver", self.ResetDriverHandler),
+            (r"/image_path", self.ImagePathHandler),
         ]
 
-        iwa = INDIWebApp(handle_blob=self.new_image, indihost="localhost", indiport=7624)
+        iwa = INDIWebApp(handle_blob=self.new_image, indihost="wfs-dev.mmto.arizona.edu", indiport=7624)
         self.extra_handlers.extend(iwa.indi_handlers())
         self.indiargs = {"device_name":["*"]}
 
@@ -110,16 +142,16 @@ class F5WFSsrv(CAMsrv):
         hdulist = fits.open(buff)
         if hdulist is not None:
             hdulist = update_header(hdulist)
-            if self.application.bad_pixel_mask is not None:
+            if self.bad_pixel_mask is not None:
                 im = hdulist[0].data
-                if im.shape != self.application.bad_pixel_mask.shape:
+                if im.shape != self.bad_pixel_mask.shape:
                     log.warning("Wrong readout configuration for making bad pixel corrections...")
                 else:
                     blurred = median_filter(im, size=5)
-                    im[self.application.bad_pixel_mask] = blurred[self.application.bad_pixel_mask]
+                    im[self.bad_pixel_mask] = blurred[self.bad_pixel_mask]
 
-            self.application.latest_image = hdulist[0]
-            self.application.save_latest()
+            self.latest_image = hdulist[0]
+            self.save_latest()
 
         else:
             log.error("Exposure Failed")

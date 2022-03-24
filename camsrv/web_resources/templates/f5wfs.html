@@ -18,13 +18,12 @@
 
 
     <!-- Load pyINDI scripts -->
-		<script src="/indi/static/js/indi.js"></script>
-		<script src="/indi/static/js/maps-indi.js"></script>
-		<script src="/indi/static/js/constants.js"></script>
-		<script src="/indi/static/js/config.js"></script>
-		<!-- Load pyINDI styling -->
-		<link rel="stylesheet" href="/indi/static/css/indi.css">
-
+    <script src="/indi/static/js/indi.js"></script>
+    <script src="/indi/static/js/maps-indi.js"></script>
+    <script src="/indi/static/js/constants.js"></script>
+    <script src="/indi/static/js/config.js"></script>
+    <!-- Load pyINDI styling -->
+    <link rel="stylesheet" href="/indi/static/css/indi.css">
 
     <style type="text/css">
       #centerdiv {
@@ -119,10 +118,15 @@
 				}
 				else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
 				{
+                    console.log("CONNECTION")
+                    console.log(indi)
 					if(indi.CONNECT == "On")
                     {
 						$("#connect").text("Connected").removeClass("btn-danger").addClass("btn-success")
-
+                    }
+                    else
+                    {
+						$("#connect").text("NOT Connected").addClass("btn-danger").removeClass("btn-success")
                     }
 				}
 				else if(indi.name === "CCD_COOLER" && indi.op === IndiOp.SET)
@@ -233,8 +237,8 @@
                                     <button type="button" id="confdefault" class="btn btn-primary btn-sm">Default Configuration</button>
                                 </div>
                                 <div class='form-group col-md-4'>
-                                    <button type="button" id="connect" class="btn btn-danger btn-sm">NOT Connected</button>
 
+                                    <button type="button" id="restart_indi" class="btn btn-danger btn-sm">Restart Diver</button>
                                    
                                 </div>
                             </div>
@@ -252,6 +256,9 @@
                     </div>
                 </div>
             </div>
+        <div class="row justify-content-left">
+            <button type="button" id="connect" class="btn btn-danger btn-sm">NOT Connected</button>
+        </div>
         <div class="row justify-content-left">
             <div class='col-md-10 align-self-left'>
                 <form class="form-inline">
@@ -417,6 +424,13 @@
                 setindi("Switch", "SBIG CCD.CONNECTION", "CONNECT", "On", "DISCONNECT", "Off");
             });
 
+            $('#restart_indi').on('click', function(){
+                $.get("restart_indidriver", function(){
+                    console.log("Restarted the indidriver");
+                    window.location.reload(true)
+                    }).fail(function(data) {alert(data)}) ;
+            });
+            /*
             (function update() {
                 $.getJSON("status", {format: "json"}).done(function(data) {
                     if (busy == false) {
@@ -445,7 +459,7 @@
                     };
                     setTimeout(update, 2000);
                 });
-            })();
+            })();*/
 
         </script>
         <div class='row'>

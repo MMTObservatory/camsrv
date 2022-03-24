@@ -322,7 +322,7 @@ class CAMsrv(tornado.web.Application):
         static_path = parent / "static"
         js9_path = parent / "js9"
         bootstrap_path = parent / "bootstrap"
-
+        print(bootstrap_path)
         self.camhost = camhost
         self.camport = camport
 
