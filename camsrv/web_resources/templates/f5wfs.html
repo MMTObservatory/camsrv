@@ -147,7 +147,7 @@
                 }
 				else if(indi.name === "CCD_TEMPERATURE" && indi.op === IndiOp.SET)
                 {
-                    $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE + " ˚C");
+                    $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C");
                     enable(STATE_CFGING_TEMP);
 
                 }
