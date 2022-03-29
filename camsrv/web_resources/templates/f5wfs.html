@@ -54,6 +54,7 @@
 		<script>
 			/* Constants */
 			UserConfig.CUSTOM_GUI = true; // Triggers to true if html is in body tag below
+			F5_GLOBALS = {COOLING:false}
 
 
 			/**
@@ -102,7 +103,8 @@
 					console.log("loading JS9")
 					JS9.Load(indi.CCD1, {onload: function() {
 							if (cmap != null) {
-									JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+								JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+								JS9.SetScale('zscale');
 							};
 					}});
 					$("#progress").css("width", "0%").text("");
@@ -133,10 +135,12 @@
                 {
                     if(indi.COOLER_ON === "On")
                     {
+                        F5_GLOBALS.COOLING = true;
                         $("#cooling").prop("checked", true)
                     }
                     else
                     {
+                        F5_GLOBALS.COOLING = false;
                         $("#cooling").prop("checked", false)
                     }
                     enable(STATE_STARTING_COOL);
@@ -243,15 +247,15 @@
                                 </div>
                             </div>
 
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CONNECTION"></div>
-                			<div data-custom-device="SBIG CCD" data-custom-vector="CCD_EXPOSURE"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="SIMULATION"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_TEMPERATURE"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_TEMP_RAMP"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_COOLER"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_COOLER_POWER"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME_TYPE"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CONNECTION"></div>
+                			<div data-custom-device="F/5 WFS" data-custom-vector="CCD_EXPOSURE"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="SIMULATION"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_FRAME"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_TEMPERATURE"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_TEMP_RAMP"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_COOLER"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_COOLER_POWER"></div>
+			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_FRAME_TYPE"></div>
                         </form>
                     </div>
                 </div>
@@ -264,11 +268,7 @@
                 <form class="form-inline">
                     <div class="form-row form-group">
                         <div class="custom-control custom-radio custom-control-inline">
-                            {% if args['cooling'] == "On" %}
-                                <input id="cooling" type="checkbox" class="custom-control-input" checked>
-                            {% else %}
                                 <input id="cooling" type="checkbox" class="custom-control-input">
-                            {% end %}
                             <label class="custom-control-label" for="cooling">Enable Cooling</label>
                         </div>
                         <label for="settemp">Set Temp (˚C):</label>
@@ -290,17 +290,6 @@
             <div class='col-md-10'>
                 <form class="form-inline">
                     <div class="form-group">
-                        <label for="exptype">Exposure Type:</label>
-                        <select class="form-control form-control-sm" id="exptype">
-                            {% for f in args['frame_types'] %}
-                                {% if f == 'Light' %}
-                                    <option selected value={{ f }}>{{ f }}</option>
-                                {% else %}
-                                    <option value={{ f }}>{{ f }}</option>
-                                {% end %}
-                            {% end %}
-                        </select>
-                        <label for="exptime">Exposure Time (sec):</label>
                         <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=1.0 value=10.0 id="exptime">
                         <button type="button" id="expose" class="btn btn-primary">Expose</button>
                         <!-- <label class="form-check-label"><label class="custom-control custom-checkbox">
@@ -373,20 +362,35 @@
                 var exptime = $('#exptime').val();
                 var filt = $('#filter').val();
 	        	EXPOSING_TIME=parseFloat(exptime);
-        		setindi("Number", "SBIG CCD.CCD_EXPOSURE", "CCD_EXPOSURE_VALUE", exptime)
+        		setindi("Number", "F/5 WFS.CCD_EXPOSURE", "CCD_EXPOSURE_VALUE", exptime)
                 var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
 
             });
             $('#cooling').on('click', function() {
-                setindi("Switch", "SBIG CCD.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off")
+                //let cooling_state = $("#cooling").prop("checked");
+                //For some reason checking the state of the 
+                // radio button does not always return the correct sate
+                //!!!!????
+                //so we use the GLOBALS instead. 
+                    
+                if(F5_GLOBALS.COOLING)
+                {
+                    setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "Off", "COOLER_OFF", "On");
+                }
+                else 
+                {
+                    setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
+                }
                 disable(STATE_STARTING_COOL);
 
             });
             $('#conftemp').on('click', function(){
                 
+	   	
+                
                 disable(STATE_CFGING_TEMP);
                 var temp = $('#settemp').val();
-                setindi("Number", "SBIG CCD.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
+                setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
                 var url = "temperature?temp=" + temp;
             });
 
@@ -421,7 +425,7 @@
                 });
             });
             $('#connect').on('click', function(){
-                setindi("Switch", "SBIG CCD.CONNECTION", "CONNECT", "On", "DISCONNECT", "Off");
+                setindi("Switch", "F/5 WFS.CONNECTION", "CONNECT", "On", "DISCONNECT", "Off");
             });
 
             $('#restart_indi').on('click', function(){
@@ -430,7 +434,7 @@
                     window.location.reload(true)
                     }).fail(function(data) {alert(data)}) ;
             });
-            /*
+            /*This should be deleted.
             (function update() {
                 $.getJSON("status", {format: "json"}).done(function(data) {
                     if (busy == false) {
@@ -464,9 +468,9 @@
         </script>
         <div class='row'>
             <div class='col-12'>
-                <div class="JS9Menubar" data-width="900px"></div>
-                <div class="JS9" data-width="900px" data-height="900px"></div>
-                <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="900px"></div>
+                <div class="JS9Menubar" data-width="600px"></div>
+                <div class="JS9" data-width="600px" data-height="600px"></div>
+                <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="600px"></div>
             </div>
         </div>
 
