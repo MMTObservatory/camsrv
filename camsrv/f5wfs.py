@@ -3,46 +3,35 @@ MMTO F/5 WFS camera interface
 """
 
 import os
-import socket
 import time
 import pkg_resources
-
+import asyncio
 import tornado
 import tornado.web
 import tornado.httpserver
 import tornado.ioloop
 import tornado.websocket
 from tornado.log import enable_pretty_logging
-
+from scipy.ndimage import median_filter
+from .header import update_header
 from pathlib import Path
-
 import logging
 import logging.handlers
-
 from astropy.io import fits
 import io
-
-
 from pyindi.webclient import INDIWebApp
-import base64
-
 from .camsrv import CAMsrv
 
 enable_pretty_logging()
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
-import asyncio
 log.setLevel(logging.INFO)
-import socket
 
-from .header import update_header
 
 F5WFSPORT = 8989
 
 __all__ = ['F5WFSsrv', 'main']
-
-
 
 
 class F5WFSsrv(CAMsrv):
@@ -61,14 +50,14 @@ class F5WFSsrv(CAMsrv):
         """
         def get(self):
             cam = self.application.camera
-            log.info("Setting f/5 WFS camera to its default configuration, full-frame with 1x1 binning...")
+            log.info("Setting f/5 WFS camera to its\
+                 default configuration, full-frame with 1x1 binning...")
             cam.default_config()
-
 
     class ResetDriverHandler(tornado.web.RequestHandler):
 
         async def get(self):
-            
+
             reader, writer = await asyncio.open_connection(
                             'wfs-dev.mmto.arizona.edu', 5400)
 
@@ -77,7 +66,6 @@ class F5WFSsrv(CAMsrv):
             writer.close()
             await writer.wait_closed()
             self.finish("done")
-
 
     class ImagePathHandler(tornado.web.RequestHandler):
 
@@ -90,18 +78,21 @@ class F5WFSsrv(CAMsrv):
                 self.application.datadir = datadir
 
             self.finish(str(self.application.datadir))
-                
-                
 
     def connect_camera(self):
-        """Camera connection to indidriver is done by javascript"""
+        """
+        Camera connection to indidriver
+        is done by javascript
+        """
         return
 
     def save_latest(self):
         log.info("Saving latest")
         if self.latest_image is not None:
-
-            filename = self.datadir / Path("f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
+            imagename = Path(
+                "f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
+            )
+            filename = self.datadir / imagename
             log.info(f"saving to {filename}")
             self.latest_image.writeto(filename)
 
@@ -113,11 +104,20 @@ class F5WFSsrv(CAMsrv):
             (r"/image_path", self.ImagePathHandler),
         ]
 
-        iwa = INDIWebApp(handle_blob=self.new_image, indihost="wfs-dev.mmto.arizona.edu", indiport=7624)
-        self.extra_handlers.extend(iwa.indi_handlers())
-        self.indiargs = {"device_name":["*"]}
+        iwa = INDIWebApp(
+            handle_blob=self.new_image,
+            indihost="wfs-dev.mmto.arizona.edu",
+            indiport=7624
+        )
 
-        super(F5WFSsrv, self).__init__(camhost=camhost, camport=camport, connect=connect)
+        self.extra_handlers.extend(iwa.indi_handlers())
+        self.indiargs = {"device_name": ["*"]}
+
+        super(F5WFSsrv, self).__init__(
+            camhost=camhost,
+            camport=camport,
+            connect=connect
+        )
 
         self.home_template = "f5wfs.html"
 
@@ -133,10 +133,13 @@ class F5WFSsrv(CAMsrv):
         self.default_exptime = 10.0
 
         # We have to make one for f5
-        bp_file = pkg_resources.resource_filename(__name__, os.path.join("data", "f9_mask.fits"))
+        bp_file = pkg_resources.resource_filename(
+            __name__,
+            os.path.join("data", "f9_mask.fits")
+        )
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
-    
+
     def new_image(self, blob):
         buff = io.BytesIO(blob['data'])
         hdulist = fits.open(buff)
@@ -145,7 +148,10 @@ class F5WFSsrv(CAMsrv):
             if self.bad_pixel_mask is not None:
                 im = hdulist[0].data
                 if im.shape != self.bad_pixel_mask.shape:
-                    log.warning("Wrong readout configuration for making bad pixel corrections...")
+                    log.warning(
+                     "Wrong readout configuration for\
+                      making bad pixel corrections..."
+                    )
                 else:
                     blurred = median_filter(im, size=5)
                     im[self.bad_pixel_mask] = blurred[self.bad_pixel_mask]
@@ -157,12 +163,9 @@ class F5WFSsrv(CAMsrv):
             log.error("Exposure Failed")
 
 
-
-
 def main(port=F5WFSPORT):
     application = F5WFSsrv()
 
-    
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(port)
 
