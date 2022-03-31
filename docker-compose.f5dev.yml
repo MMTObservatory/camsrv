@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:  
+    f5wfs:
+        image: mmtobservatory/camsrv:latest
+        ports:
+            - 8787:8787
+        command: ["f5wfs"]
+
+    indiserver:
+        image: junk
+        command: indiserver indi_sbig_ccd
