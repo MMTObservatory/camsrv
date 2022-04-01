@@ -12,8 +12,8 @@ from astropy.units import cds
 from astropy.io import fits
 
 urllib3.disable_warnings()
-API_HOST = "https://api.mmto.arizona.edu/APIv1"
-REDIS_HOST = "ops.mmto.arizona.edu"
+API_HOST = "http://api.mmto.arizona.edu/APIv1"
+REDIS_HOST = "ops2.mmto.arizona.edu"
 
 HEADER_MAP = {
     'mount_mini_ra': {
