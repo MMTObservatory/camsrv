@@ -59,7 +59,7 @@ class F5WFSsrv(CAMsrv):
         async def get(self):
 
             reader, writer = await asyncio.open_connection(
-                            'ops2-dev.mmto.arizona.edu', 7625)
+                            'ops2.mmto.arizona.edu', 7625)
 
             writer.write(b"stop indi_sbig_ccd -n \"F/5 WFS\"\n")
             await writer.drain()
