@@ -104,7 +104,6 @@
 					JS9.Load(indi.CCD1, {onload: function() {
 							if (cmap != null) {
 								JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-								JS9.SetScale('zscale');
 							};
 					}});
 					$("#progress").css("width", "0%").text("");
@@ -242,7 +241,7 @@
                                 </div>
                                 <div class='form-group col-md-4'>
 
-                                    <button type="button" id="restart_indi" class="btn btn-danger btn-sm">Restart Diver</button>
+                                    <button type="button" id="restart_indi" class="btn btn-danger btn-sm">Restart Driver</button>
                                    
                                 </div>
                             </div>

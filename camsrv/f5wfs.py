@@ -59,9 +59,11 @@ class F5WFSsrv(CAMsrv):
         async def get(self):
 
             reader, writer = await asyncio.open_connection(
-                            'wfs-dev.mmto.arizona.edu', 5400)
+                            'ops2-dev.mmto.arizona.edu', 7625)
 
-            writer.write(b"restart")
+            writer.write(b"stop indi_sbig_ccd -n \"F/5 WFS\"\n")
+            await writer.drain()
+            writer.write(b"start indi_sbig_ccd -n \"F/5 WFS\"\n")
             await writer.drain()
             writer.close()
             await writer.wait_closed()
@@ -106,7 +108,7 @@ class F5WFSsrv(CAMsrv):
 
         iwa = INDIWebApp(
             handle_blob=self.new_image,
-            indihost="wfs-dev.mmto.arizona.edu",
+            indihost="ops2.mmto.arizona.edu",
             indiport=7624
         )
 
@@ -169,7 +171,7 @@ def main(port=F5WFSPORT):
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(port)
 
-    print(f"F/9 WFS camera server running at http://127.0.0.1:{port}/")
+    print(f"F/5 WFS camera server running at http://127.0.0.1:{port}/")
     print("Press Ctrl+C to quit")
 
     tornado.ioloop.IOLoop.instance().start()
