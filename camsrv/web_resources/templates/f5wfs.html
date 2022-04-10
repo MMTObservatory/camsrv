@@ -18,14 +18,26 @@
 
 
     <!-- Load pyINDI scripts -->
-    <script src="/indi/static/js/indi.js"></script>
-    <script src="/indi/static/js/maps-indi.js"></script>
+
     <script src="/indi/static/js/constants.js"></script>
-    <script src="/indi/static/js/config.js"></script>
-    <!-- Load pyINDI styling -->
+    <script src="/indi/static/js/indi.js"></script>
+    <script src="/indi/static/js/builder-indi.js"></script>
+    <script src="/indi/static/js/updater-indi.js"></script>
+    <script src="/indi/static/js/logger-indi.js"></script>
+    <script src="/indi/static/js/utils-indi.js"></script>
+    <script src="/indi/static/js/maps-indi.js"></script>
+
+
+        <!-- Load pyINDI styling -->
     <link rel="stylesheet" href="/indi/static/css/indi.css">
 
     <style type="text/css">
+      div.pyindi {
+      display: none
+      }
+      span#image_name{
+        padding-left:10px;
+      }
       #centerdiv {
           position: absolute;
           margin: auto;
@@ -53,6 +65,7 @@
     <title>F/5 Wavefront Sensor Camera Interface</title>
 		<script>
 			/* Constants */
+            UserConfig = {};
 			UserConfig.CUSTOM_GUI = true; // Triggers to true if html is in body tag below
 			F5_GLOBALS = {COOLING:false}
 
@@ -63,7 +76,7 @@
 			const main = () => {
 				// Tornado way of getting list
 				var devices = {% raw json_encode(device_name) %};
-				builder.init(devices);
+                initialize(devices, customGui=false);
 
 				return;
 			}
@@ -104,7 +117,11 @@
 					JS9.Load(indi.CCD1, {onload: function() {
 							if (cmap != null) {
 								JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                    
 							};
+                            $.get("/latest_image_name", function(data){
+                                    $("span#image_name").text(data)
+                                })
 					}});
 					$("#progress").css("width", "0%").text("");
 					$("#progress").removeClass("progress-bar-striped progress-bar-animated");
@@ -270,9 +287,11 @@
                                 <input id="cooling" type="checkbox" class="custom-control-input">
                             <label class="custom-control-label" for="cooling">Enable Cooling</label>
                         </div>
+                        <!--
                         <label for="settemp">Set Temp (˚C):</label>
                         <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
                         <button id="conftemp" type="button" class="btn btn-primary btn-sm">Configure Temp</button>
+                    -->
                     </div>
                 </form>
             </div>
@@ -296,6 +315,8 @@
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Continuous Exposure Loop</span>
                         </label> -->
+
+                        <span id="image_name"></span>
                     </div>
                 </form>
             </div>
@@ -373,11 +394,12 @@
                 //so we use the GLOBALS instead. 
                     
                 if(F5_GLOBALS.COOLING)
-                {
+                {//Turn it offf
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "Off", "COOLER_OFF", "On");
                 }
                 else 
                 {
+                    setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", {{ DEFAULT_TEMP }})
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
                 }
                 disable(STATE_STARTING_COOL);
@@ -430,7 +452,6 @@
             $('#restart_indi').on('click', function(){
                 $.get("restart_indidriver", function(){
                     console.log("Restarted the indidriver");
-                    window.location.reload(true)
                     }).fail(function(data) {alert(data)}) ;
             });
             /*This should be deleted.

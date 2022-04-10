@@ -29,7 +29,8 @@ log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
 
-F5WFSPORT = 8989
+#F5WFSPORT = 8989
+F5WFSPORT = 8988 # F5WFSPORT
 
 __all__ = ['F5WFSsrv', 'main']
 
@@ -63,10 +64,16 @@ class F5WFSsrv(CAMsrv):
 
             writer.write(b"stop indi_sbig_ccd -n \"F/5 WFS\"\n")
             await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
+            reader, writer = await asyncio.open_connection(
+                            'ops2.mmto.arizona.edu', 7625)
             writer.write(b"start indi_sbig_ccd -n \"F/5 WFS\"\n")
             await writer.drain()
             writer.close()
             await writer.wait_closed()
+
             self.finish("done")
 
     class ImagePathHandler(tornado.web.RequestHandler):
@@ -80,6 +87,18 @@ class F5WFSsrv(CAMsrv):
                 self.application.datadir = datadir
 
             self.finish(str(self.application.datadir))
+
+    class LatestImageNameHandler(tornado.web.RequestHandler):
+
+        def get(self):
+            if hasattr(self.application, "last_filename"):
+                if self.application.last_filename is None:
+                    self.write("None")
+                else:
+                    self.write(str(self.application.last_filename))
+            else:
+                self.write("None")
+            
 
     def connect_camera(self):
         """
@@ -95,6 +114,7 @@ class F5WFSsrv(CAMsrv):
                 "f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
             )
             filename = self.datadir / imagename
+            self.last_filename = filename
             log.info(f"saving to {filename}")
             self.latest_image.writeto(filename)
 
@@ -104,6 +124,7 @@ class F5WFSsrv(CAMsrv):
             (r"/default_config", self.DefaultModeHandler),
             (r"/restart_indidriver", self.ResetDriverHandler),
             (r"/image_path", self.ImagePathHandler),
+            (r"/latest_image_name", self.LatestImageNameHandler)
         ]
 
         iwa = INDIWebApp(
@@ -113,7 +134,7 @@ class F5WFSsrv(CAMsrv):
         )
 
         self.extra_handlers.extend(iwa.indi_handlers())
-        self.indiargs = {"device_name": ["*"]}
+        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP":-20.0}
 
         super(F5WFSsrv, self).__init__(
             camhost=camhost,

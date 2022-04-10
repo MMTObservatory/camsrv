@@ -103,7 +103,7 @@ class CAMsrv(tornado.web.Application):
 
                 hdulist = cam.expose(exptime=float(exptime), exptype=exptype)
                 if hdulist is not None:
-                    hdulist = update_header(hdulist)
+                    #hdulist = update_header(hdulist)
                     if self.application.bad_pixel_mask is not None:
                         im = hdulist[0].data
                         if im.shape != self.application.bad_pixel_mask.shape:
