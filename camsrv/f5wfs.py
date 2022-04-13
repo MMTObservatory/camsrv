@@ -29,8 +29,8 @@ log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
 
-#F5WFSPORT = 8989
-F5WFSPORT = 8988 # F5WFSPORT
+F5WFSPORT = 8989
+#F5WFSPORT = 8988 # F5WFSPORT
 
 __all__ = ['F5WFSsrv', 'main']
 
