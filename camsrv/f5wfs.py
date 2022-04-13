@@ -132,7 +132,7 @@ class F5WFSsrv(CAMsrv):
         )
 
         self.extra_handlers.extend(iwa.indi_handlers())
-        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP": -5.0}
+        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP": -10.0}
 
         super(F5WFSsrv, self).__init__(
             camhost=camhost,
@@ -150,7 +150,7 @@ class F5WFSsrv(CAMsrv):
             self.datadir = Path("wfsdat")
 
         self.latest_image = None
-        self.requested_temp = -25.0
+        self.requested_temp = -10.0
         self.default_exptime = 10.0
 
         # We have to make one for f5
