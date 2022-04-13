@@ -156,7 +156,7 @@ class F5WFSsrv(CAMsrv):
         # We have to make one for f5
         bp_file = pkg_resources.resource_filename(
             __name__,
-            os.path.join("data", "f9_mask.fits")
+            os.path.join("data", "f5_mask.fits")
         )
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
