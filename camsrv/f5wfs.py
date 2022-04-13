@@ -30,7 +30,6 @@ log.setLevel(logging.INFO)
 
 
 F5WFSPORT = 8989
-#F5WFSPORT = 8988 # F5WFSPORT
 
 __all__ = ['F5WFSsrv', 'main']
 
@@ -98,7 +97,6 @@ class F5WFSsrv(CAMsrv):
                     self.write(str(self.application.last_filename))
             else:
                 self.write("None")
-            
 
     def connect_camera(self):
         """
@@ -134,7 +132,7 @@ class F5WFSsrv(CAMsrv):
         )
 
         self.extra_handlers.extend(iwa.indi_handlers())
-        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP":-20.0}
+        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP": -5.0}
 
         super(F5WFSsrv, self).__init__(
             camhost=camhost,
