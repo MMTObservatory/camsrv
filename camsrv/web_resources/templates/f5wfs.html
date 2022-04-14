@@ -114,7 +114,7 @@
 					JS9.CloseImage();
 
 					console.log("loading JS9")
-					JS9.Load(indi.CCD1, {onload: function() {
+					JS9.Load("latest", {onload: function() {
 							if (cmap != null) {
 								JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
 
