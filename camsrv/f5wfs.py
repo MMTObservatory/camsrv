@@ -47,7 +47,7 @@ class F5WFSsrv(CAMsrv):
 
     class WFSModeHandler(tornado.web.RequestHandler):
         """
-        Deprecated and should be deleted in future commits. 
+        Deprecated and should be deleted in future commits.
 
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
@@ -58,7 +58,7 @@ class F5WFSsrv(CAMsrv):
 
     class DefaultModeHandler(tornado.web.RequestHandler):
         """
-        Deprecated and should be deleted in future commits. 
+        Deprecated and should be deleted in future commits.
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
         def get(self):
@@ -200,13 +200,13 @@ class F5WFSsrv(CAMsrv):
             self.datadir = Path("wfsdat")
 
         self.latest_image = None
-        self.requested_temp = -25.0
+        self.requested_temp = -10.0
         self.default_exptime = 10.0
 
         # We have to make one for f5
         bp_file = pkg_resources.resource_filename(
             __name__,
-            os.path.join("data", "f9_mask.fits")
+            os.path.join("data", "f5_mask.fits")
         )
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
@@ -217,8 +217,8 @@ class F5WFSsrv(CAMsrv):
 
 
         @param blob
-        The blob object from the indidriver in this case it is the 
-        image from the sbig wfs camera. 
+        The blob object from the indidriver in this case it is the
+        image from the sbig wfs camera.
         """
         buff = io.BytesIO(blob['data'])
         hdulist = fits.open(buff)

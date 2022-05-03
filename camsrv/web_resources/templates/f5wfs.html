@@ -83,11 +83,11 @@
 
 
 			/**
-			* This function will be called whenever an INDI property with the device 
+			* This function will be called whenever an INDI property with the device
 			*	{{ device_name }} is received. This is where users should modify the
 			*	code to append to specific objects.
 			*
-			*	If wanting to use a custom GUI, enable in the configuration and provide the correct syntax for selecting 
+			*	If wanting to use a custom GUI, enable in the configuration and provide the correct syntax for selecting
 			* elements.
 			* @param {Object} indi Contains all information about INDI property
 			*/
@@ -184,7 +184,7 @@
         <h1 class="display-4">F/5 Wavefront Sensor Camera Interface</h1>
     </div>
 		<div id="indicontainer" style="display:none">
-			
+
 		</div>
     <div class="container">
         <div id="accordion" role="tablist">
@@ -263,7 +263,7 @@
                                 <div class='form-group col-md-4'>
 
                                     <button type="button" id="restart_indi" class="btn btn-danger btn-sm">Restart Driver</button>
-                                   
+
                                 </div>
                             </div>
                         -->
@@ -392,7 +392,7 @@
             };
             function enable(STATE) {
                 BUSY_STATUS = BUSY_STATUS & (STATE ^ 0Xff)
-                //Only enable if all status bits are zero. 
+                //Only enable if all status bits are zero.
                 if ( BUSY_STATUS === 0x00 )
                 {
                     $('#connect').prop("disabled", false);
@@ -428,18 +428,17 @@
             });
             $('#cooling').on('click', function() {
                 //let cooling_state = $("#cooling").prop("checked");
-                //For some reason checking the state of the 
+                //For some reason checking the state of the
                 // radio button does not always return the correct sate
                 //!!!!????
-                //so we use the GLOBALS instead. 
-                    
+                //so we use the GLOBALS instead.
+
                 if(F5_GLOBALS.COOLING)
                 {//Turn it offf
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "Off", "COOLER_OFF", "On");
                 }
-                else 
-                {   
-                    console.log("Setting temperature to {{ DEFAULT_TEMP }}")
+                else
+                {
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
                     setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", {{ DEFAULT_TEMP }})
                 }
@@ -447,9 +446,9 @@
 
             });
             $('#conftemp').on('click', function(){
-                
-	   	
-                
+
+
+
                 disable(STATE_CFGING_TEMP);
                 var temp = $('#settemp').val();
                 setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
