@@ -4,8 +4,8 @@ MMTO F/5 WFS camera interface
 
 import os
 import time
-import pkg_resources
 import asyncio
+import pkg_resources
 import tornado
 import tornado.web
 import tornado.httpserver
@@ -13,14 +13,21 @@ import tornado.ioloop
 import tornado.websocket
 from tornado.log import enable_pretty_logging
 from scipy.ndimage import median_filter
-from .header import update_header
 from pathlib import Path
 import logging
 import logging.handlers
 from astropy.io import fits
 import io
+import json
 from pyindi.webclient import INDIWebApp
-from .camsrv import CAMsrv
+
+dev = os.environ.get("WFSDEV", False)
+if dev:
+    from header import update_header
+    from camsrv import CAMsrv
+else:
+    from .header import update_header
+    from .camsrv import CAMsrv
 
 enable_pretty_logging()
 logger = logging.getLogger("")
@@ -28,16 +35,20 @@ logger.setLevel(logging.INFO)
 log = logging.getLogger('tornado.application')
 log.setLevel(logging.INFO)
 
-
-#F5WFSPORT = 8989
-F5WFSPORT = 8988 # F5WFSPORT
+if dev:
+    F5WFSPORT = 8988  # F5WFSPORT
+else:
+    F5WFSPORT = 8989
 
 __all__ = ['F5WFSsrv', 'main']
 
 
 class F5WFSsrv(CAMsrv):
+
     class WFSModeHandler(tornado.web.RequestHandler):
         """
+        Deprecated and should be deleted in future commits. 
+
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
         def get(self):
@@ -47,6 +58,7 @@ class F5WFSsrv(CAMsrv):
 
     class DefaultModeHandler(tornado.web.RequestHandler):
         """
+        Deprecated and should be deleted in future commits. 
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
         def get(self):
@@ -58,25 +70,49 @@ class F5WFSsrv(CAMsrv):
     class ResetDriverHandler(tornado.web.RequestHandler):
 
         async def get(self):
+            """
+            Restart the INDI driver running on ops2.
+            The indiserver/driver is running in a python
+            script that starts indiserver and opens a
+            named pipe to dynamically start and stop
+            drivers. We can connect to the python
+            program to send restart commands to the driver.
+            """
+            driver = self.get_argument("NAME", "F/5 WFS")
+            INDIHOST = os.environ.get(
+                "INDIF5WFSHOST",
+                "ops2.mmto.arizona.edu")
+            INDIPORT = os.environ.get(
+                "INDIF5WFSPORT",
+                "7625")
 
             reader, writer = await asyncio.open_connection(
-                            'ops2.mmto.arizona.edu', 7625)
+                INDIHOST, INDIPORT)
+            json_data = dict(
+                action="restart_drivers",
+                args=[driver]
+            )
 
-            writer.write(b"stop indi_sbig_ccd -n \"F/5 WFS\"\n")
+            writer.write(json.dumps(json_data).encode() + b'\n')
+
+            resp = await reader.readline()
+            try:
+                self.finish(json.loads(resp))
+            except Exception:
+                self.finish(f"not json data: {resp}")
+
             await writer.drain()
             writer.close()
             await writer.wait_closed()
-
-            reader, writer = await asyncio.open_connection(
-                            'ops2.mmto.arizona.edu', 7625)
-            writer.write(b"start indi_sbig_ccd -n \"F/5 WFS\"\n")
-            await writer.drain()
-            writer.close()
-            await writer.wait_closed()
-
-            self.finish("done")
 
     class ImagePathHandler(tornado.web.RequestHandler):
+        """
+        Change the image path.
+        This is here in case we need to change the
+        image path at run time. I think we won't need
+        it and it can probably be deleted in future
+        commits.
+        """
 
         def get(self):
             path = self.get_argument("path", None)
@@ -88,7 +124,19 @@ class F5WFSsrv(CAMsrv):
 
             self.finish(str(self.application.datadir))
 
+    class PyindiPanelHandler(tornado.web.RequestHandler):
+
+        def get(self):
+
+            self.render("pyindi-panel.html")
+
     class LatestImageNameHandler(tornado.web.RequestHandler):
+        """
+        Return the last image filename and path to a get
+        request.
+        This is used by the webapp to display the latest
+        image filename.
+        """
 
         def get(self):
             if hasattr(self.application, "last_filename"):
@@ -98,7 +146,6 @@ class F5WFSsrv(CAMsrv):
                     self.write(str(self.application.last_filename))
             else:
                 self.write("None")
-            
 
     def connect_camera(self):
         """
@@ -124,7 +171,8 @@ class F5WFSsrv(CAMsrv):
             (r"/default_config", self.DefaultModeHandler),
             (r"/restart_indidriver", self.ResetDriverHandler),
             (r"/image_path", self.ImagePathHandler),
-            (r"/latest_image_name", self.LatestImageNameHandler)
+            (r"/latest_image_name", self.LatestImageNameHandler),
+            (r"/pyindi-panel.html", self.PyindiPanelHandler)
         ]
 
         iwa = INDIWebApp(
@@ -134,7 +182,7 @@ class F5WFSsrv(CAMsrv):
         )
 
         self.extra_handlers.extend(iwa.indi_handlers())
-        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP":-20.0}
+        self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP": -10.0}
 
         super(F5WFSsrv, self).__init__(
             camhost=camhost,
@@ -164,6 +212,14 @@ class F5WFSsrv(CAMsrv):
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
 
     def new_image(self, blob):
+        """
+        Pyindi blob callback
+
+
+        @param blob
+        The blob object from the indidriver in this case it is the 
+        image from the sbig wfs camera. 
+        """
         buff = io.BytesIO(blob['data'])
         hdulist = fits.open(buff)
         if hdulist is not None:
@@ -172,7 +228,7 @@ class F5WFSsrv(CAMsrv):
                 im = hdulist[0].data
                 if im.shape != self.bad_pixel_mask.shape:
                     log.warning(
-                     "Wrong readout configuration for\
+                        "Wrong readout configuration for\
                       making bad pixel corrections..."
                     )
                 else:

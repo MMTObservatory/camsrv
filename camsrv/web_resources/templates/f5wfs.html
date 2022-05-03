@@ -75,7 +75,7 @@
 			*/
 			const main = () => {
 				// Tornado way of getting list
-				var devices = {% raw json_encode(device_name) %};
+				var devices =['*'];
                 initialize(devices, customGui=false);
 
 				return;
@@ -107,73 +107,76 @@
 				}
 				// Handle vector every time it comes in
 				var vector = updater.vector(indi);
-				if(indi.name === "CCD1" && indi.op === IndiOp.SET)
-				{
-					enable(STATE_EXPOSING);
-					cmap = JS9.GetColormap();
-					JS9.CloseImage();
-					
-					console.log("loading JS9")
-					JS9.Load(indi.CCD1, {onload: function() {
-							if (cmap != null) {
-								JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-                    
-							};
-                            $.get("/latest_image_name", function(data){
-                                    $("span#image_name").text(data)
-                                })
-					}});
-					$("#progress").css("width", "0%").text("");
-					$("#progress").removeClass("progress-bar-striped progress-bar-animated");
-					// if ($('#continuous').prop("checked")) {
-					//    $('#expose').trigger('click');
-					// };
-				}
-				else if(indi.name === "CCD_EXPOSURE" && indi.op === IndiOp.SET)
-				{
-					percent = 100 * (1-indi.CCD_EXPOSURE_VALUE/EXPOSING_TIME)
-                    $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
-				}
-				else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
-				{
-                    console.log("CONNECTION")
-                    console.log(indi)
-					if(indi.CONNECT == "On")
-                    {
-						$("#connect").text("Connected").removeClass("btn-danger").addClass("btn-success")
-                    }
-                    else
-                    {
-						$("#connect").text("NOT Connected").addClass("btn-danger").removeClass("btn-success")
-                    }
-				}
-				else if(indi.name === "CCD_COOLER" && indi.op === IndiOp.SET)
+                if(indi.device === "F/5 WFS")
                 {
-                    if(indi.COOLER_ON === "On")
+                    if(indi.name === "CCD1" && indi.op === IndiOp.SET)
                     {
-                        F5_GLOBALS.COOLING = true;
-                        $("#cooling").prop("checked", true)
+                        enable(STATE_EXPOSING);
+                        cmap = JS9.GetColormap();
+                        JS9.CloseImage();
+                        
+                        console.log("loading JS9")
+                        JS9.Load(indi.CCD1, {onload: function() {
+                                if (cmap != null) {
+                                    JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                        
+                                };
+                                $.get("/latest_image_name", function(data){
+                                        $("span#image_name").text(data)
+                                    })
+                        }});
+                        $("#progress").css("width", "0%").text("");
+                        $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                        // if ($('#continuous').prop("checked")) {
+                        //    $('#expose').trigger('click');
+                        // };
                     }
-                    else
+                    else if(indi.name === "CCD_EXPOSURE" && indi.op === IndiOp.SET)
                     {
-                        F5_GLOBALS.COOLING = false;
-                        $("#cooling").prop("checked", false)
+                        percent = 100 * (1-indi.CCD_EXPOSURE_VALUE/EXPOSING_TIME)
+                        $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
                     }
-                    enable(STATE_STARTING_COOL);
-                }
-				else if(indi.name === "CCD_TEMPERATURE" && indi.op === IndiOp.SET)
-                {
-                    $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C");
-                    enable(STATE_CFGING_TEMP);
+                    else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
+                    {
+                        console.log("CONNECTION")
+                        console.log(indi)
+                        if(indi.CONNECT == "On")
+                        {
+                            $("#connect").text("Connected").removeClass("btn-danger").addClass("btn-success")
+                        }
+                        else
+                        {
+                            $("#connect").text("NOT Connected").addClass("btn-danger").removeClass("btn-success")
+                        }
+                    }
+                    else if(indi.name === "CCD_COOLER" && indi.op === IndiOp.SET)
+                    {   console.log("COOLING INFO INCOMING");
+                       console.log(indi);
+                        if(indi.COOLER_ON === "On")
+                        {
+                            F5_GLOBALS.COOLING = true;
+                            $("#cooling").prop("checked", true)
+                        }
+                        else
+                        {
+                            F5_GLOBALS.COOLING = false;
+                            $("#cooling").prop("checked", false)
+                        }
+                        enable(STATE_STARTING_COOL);
+                    }
+                    else if(indi.name === "CCD_TEMPERATURE" && indi.op === IndiOp.SET)
+                    {
+                        $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C");
+                        enable(STATE_CFGING_TEMP);
 
-                }
-				else if(indi.name === "CCD_COOLER_POWER" && indi.op === IndiOp.SET)
-                {
-                    $('#cpower').html(indi.CCD_COOLER_VALUE + "%");
+                    }
+                    else if(indi.name === "CCD_COOLER_POWER" && indi.op === IndiOp.SET)
+                    {
+                        $('#cpower').html(indi.CCD_COOLER_VALUE.toFixed(1) + "%");
 
+                    }
                 }
-
-        return;
+                return;
 			}
 		</script>
 <body onload="main()">
@@ -189,13 +192,14 @@
                 <div class="card-header" role="tab" id="eng_heading">
                     <h5 class="mb-0">
                         <a class="collapsed" data-toggle="collapse" href="#collapse_reg" aria-expanded="false" aria-controls="collapse_reg">
-                            Engineering Interface
+                            WFS Camera Engineering Interface
                         </a>
                     </h5>
                 </div>
                 <div id="collapse_reg" class="collapse" role="tabpanel" aria-labelledby="eng_heading" data-parent="#accordion">
                     <div class="card-body">
                         <form>
+                            <!--
                             <div class="form-row">
                                 <div class='form-group col-md-3'>
                                     <label for="frame_x">Lower X:</label>
@@ -262,7 +266,8 @@
                                    
                                 </div>
                             </div>
-
+                        -->
+                            <button type="button" id="restart_indi" class="btn btn-danger btn-sm">Restart Camera Driver</button>
 			                <div data-custom-device="F/5 WFS" data-custom-vector="CONNECTION"></div>
                 			<div data-custom-device="F/5 WFS" data-custom-vector="CCD_EXPOSURE"></div>
 			                <div data-custom-device="F/5 WFS" data-custom-vector="SIMULATION"></div>
@@ -272,10 +277,44 @@
 			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_COOLER"></div>
 			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_COOLER_POWER"></div>
 			                <div data-custom-device="F/5 WFS" data-custom-vector="CCD_FRAME_TYPE"></div>
+                            <div><a target="_blank" href="https://github.com/mmtobservatory/camsrv">frontend code on github</a></div>
+                            <div><a target="_blank" href="https://github.com/mmtobservatory/f5wfs-indi">backend code on github</a></div>
                         </form>
                     </div>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-header" role="tab" id="topbox_heading">
+                    <h5 class="mb-0">
+                        <a class="collapsed" data-toggle="collapse" href="#collapse_tp" aria-expanded="false" aria-controls="collapse_tp">
+                            Topbox Interface
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_tp" class="collapse" role="tabpanel" aria-labelledby="topbox_heading" data-parent="#accordion">
+                    <div class="card-body">
+                        <form>
+                            <button type="button" id="restart_topbox" class="btn btn-danger btn-sm">Restart Topbox Driver</button>
+                            <a target="_blank" href="http://ops2.mmto.arizona.edu:4240/vnc_wavefront.html">Wavefront VNC</a>
+                            <div data-custom-device="WAVESERV" data-custom-vector="CONNECTION"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="power"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="special_positions"></div>
+                            <div class="motion" data-custom-device="WAVESERV" data-custom-vector="CONFIG"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="axis_states"></div>
+                            <div class="motion" data-custom-device="WAVESERV" data-custom-vector="WFSPOSITION"></div>
+                            <div class="motion" data-custom-device="WAVESERV" data-custom-vector="WFSDEPLOY"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="mirror"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="trans"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="select"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="focus"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="temps"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
         <div class="row justify-content-left">
             <button type="button" id="connect" class="btn btn-danger btn-sm">NOT Connected</button>
         </div>
@@ -287,6 +326,7 @@
                                 <input id="cooling" type="checkbox" class="custom-control-input">
                             <label class="custom-control-label" for="cooling">Enable Cooling</label>
                         </div>
+                        <label>Set Temp {{ DEFAULT_TEMP }} ˚C</label>
                         <!--
                         <label for="settemp">Set Temp (˚C):</label>
                         <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
@@ -398,9 +438,10 @@
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "Off", "COOLER_OFF", "On");
                 }
                 else 
-                {
-                    setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", {{ DEFAULT_TEMP }})
+                {   
+                    console.log("Setting temperature to {{ DEFAULT_TEMP }}")
                     setindi("Switch", "F/5 WFS.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
+                    setindi("Number", "F/5 WFS.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", {{ DEFAULT_TEMP }})
                 }
                 disable(STATE_STARTING_COOL);
 
@@ -450,41 +491,35 @@
             });
 
             $('#restart_indi').on('click', function(){
-                $.get("restart_indidriver", function(){
-                    console.log("Restarted the indidriver");
+                $("#restart_indi").text("Restarting...")
+                $.get("restart_indidriver", function(data){
+                    if(data['error'] !== null)
+                    {
+                        alert(data['error'])
+                        $("#restart_indi").text("Error")
+                    }
+                    else
+                    {
+                        window.setTimeout(()=>{$("#restart_indi").text("Restart Camera Driver")}, 3000, )
+                    }
                     }).fail(function(data) {alert(data)}) ;
             });
-            /*This should be deleted.
-            (function update() {
-                $.getJSON("status", {format: "json"}).done(function(data) {
-                    if (busy == false) {
-                        $('#ctemp').html(data['temperature'] + " ˚C");
-                        $('#cpower').html(data['cooling_power'] + "%");
-                        if (data['cooling'] == "On") {
-                            $('#cooling').prop('checked', true);
-                        } else {
-                            $('#cooling').prop('checked', false);
-                        };
-                        if (data['status'] == true) {
-                            $("#connect").removeClass("btn-danger");
-                            $("#connect").addClass("btn-success");
-                            $("#connect").text("Connected");
-                        } else {
-                            $("#connect").removeClass("btn-success");
-                            $("#connect").addClass("btn-danger");
-                            $("#connect").text("NOT Connected");
-                        };
-                        $('#cframe_x').html(data['frame']['X']);
-                        $('#cframe_y').html(data['frame']['Y']);
-                        $('#cframe_w').html(data['frame']['width']);
-                        $('#cframe_h').html(data['frame']['height']);
-                        $('#cx_bin').html(data['binning']['X']);
-                        $('#cy_bin').html(data['binning']['Y']);
-                    };
-                    setTimeout(update, 2000);
-                });
-            })();*/
 
+            $('#restart_topbox').on('click', function(){
+                $("#restart_topbox").text("Restarting...")
+                $.get("restart_indidriver?NAME=WAVESERV", function(data){
+                    if(data['error'] !== null)
+                    {
+                        alert(data['error'])
+                        console.log(data['error'])
+                        $("#restart_topbox").text("Error")
+                    }
+                    else
+                    {
+                        window.setTimeout(()=>{$("#restart_topbox").text("Restart Topbox Driver")}, 3000, )
+                    }
+                    }).fail(function(data) {alert(data)}) ;
+            });
         </script>
         <div class='row'>
             <div class='col-12'>
