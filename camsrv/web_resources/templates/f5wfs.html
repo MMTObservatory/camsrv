@@ -102,7 +102,12 @@
 						if (!vector) {
 							return;
 						}
-						// Handle vector for the first time here
+						if(indi.device == "WAVESERV" && indi.name == "UPDATE")
+                        {
+
+                            //Hack to update waveserv on reloading page
+                            setindi("Switch", "WAVESERV.UPDATE", "UPDATE", "On");
+                        }
 					}
 				}
 				// Handle vector every time it comes in
@@ -114,7 +119,7 @@
                         enable(STATE_EXPOSING);
                         cmap = JS9.GetColormap();
                         JS9.CloseImage();
-                        
+                           
                         console.log("loading JS9")
                         JS9.Load(indi.CCD1, {onload: function() {
                                 if (cmap != null) {
@@ -123,18 +128,30 @@
                                 };
                                 $.get("/latest_image_name", function(data){
                                         $("span#image_name").text(data)
+                                        $("#progress").text("Exposure Done!");
+                                        $("#progress").css("border", "5px solid #080")
+                                        $("#progress").removeClass("progress-bar-striped progress-bar-animated");
                                     })
                         }});
-                        $("#progress").css("width", "0%").text("");
-                        $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                        
                         // if ($('#continuous').prop("checked")) {
                         //    $('#expose').trigger('click');
                         // };
                     }
                     else if(indi.name === "CCD_EXPOSURE" && indi.op === IndiOp.SET)
                     {
+                        $("#progress").addClass("progress-bar-striped progress-bar-animated");
                         percent = 100 * (1-indi.CCD_EXPOSURE_VALUE/EXPOSING_TIME)
                         $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
+                        if (percent > 99)
+                        {
+                            $("#progress").css("border", "5px solid #088")
+                            $("#progress").css("width", "100%").text("Reading Out...");
+                        }
+                        else
+                        {
+                            $("#progress").css("border", "none")
+                        }
                     }
                     else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
                     {
@@ -295,7 +312,7 @@
                     <div class="card-body">
                         <form>
                             <button type="button" id="restart_topbox" class="btn btn-danger btn-sm">Restart Topbox Driver</button>
-                            <a target="_blank" href="http://ops2.mmto.arizona.edu:4240/vnc_wavefront.html">Wavefront VNC</a>
+                            <a target="_blank" href="http://ops2.mmto.arizona.edu:4240/vnc_wavefront.html">VNC to F5WFS PC </a>
                             <div data-custom-device="WAVESERV" data-custom-vector="CONNECTION"></div>
                             <div data-custom-device="WAVESERV" data-custom-vector="power"></div>
                             <div data-custom-device="WAVESERV" data-custom-vector="special_positions"></div>
@@ -308,6 +325,7 @@
                             <div data-custom-device="WAVESERV" data-custom-vector="select"></div>
                             <div data-custom-device="WAVESERV" data-custom-vector="focus"></div>
                             <div data-custom-device="WAVESERV" data-custom-vector="temps"></div>
+                            <div data-custom-device="WAVESERV" data-custom-vector="UPDATE"></div>
                         </form>
                     </div>
                 </div>
@@ -407,13 +425,18 @@
             };
             function updateProgress(exp, i) {
                 if (i > 0) {
+                    console.log(`percentage is ${i}`)
+                    $("#progress").addClass("bg-info");
+                    $("#progress").removeClass("bg-success");
                     percent = 100.0 * (exp - i) / exp
                     $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
                     i = i - 0.1;
                     setTimeout(function() {updateProgress(exp, i)}, 100);
                 } else {
+                    console.log(`reading out ${i}`)
                     $("#progress").css("width", "100%").text("Reading Out...");
-                    $("#progress").addClass("progress-bar-striped progress-bar-animated");
+                    $("#progress").removeClass("bg-info");
+                    $("#progress").addClass("progress-bar-striped progress-bar-animated bg-success");
                 };
             };
             $('#expose').on('click', function() {
@@ -521,10 +544,17 @@
             });
         </script>
         <div class='row'>
-            <div class='col-12'>
-                <div class="JS9Menubar" data-width="600px"></div>
-                <div class="JS9" data-width="600px" data-height="600px"></div>
-                <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="600px"></div>
+            <div class='col-6'>
+                <div class="JS9Menubar" id="myJS9Menubar" data-width="600px"></div>
+                <div class="JS9" data-width="600px" id="myJS9"></div>
+
+                <div style="margin-top: 2px;"></div>
+                <div class="JS9Colorbar" id="myJS9Colorbar" data-width="600px"></div>
+
+            </div>
+            <div class='col-1'></div>
+            <div class='col-5'>
+                <div class="JS9Magnifier" id="myJS9Magnifier"></div>
             </div>
         </div>
 
