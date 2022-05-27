@@ -220,72 +220,14 @@
                     <div class="card-body">
                         <form>
                             <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_x">Lower X:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_x">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['X']) }} id="frame_x" aria-describedby="cframe_x">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_y">Lower Y:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_y">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ int(args['frame']['Y']) }} id="frame_y" aria-describedby="cframe_y">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_w">Width:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_w">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['width']) }} id="frame_w" aria-describedby="cframe_w">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_h">Height:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_h">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ int(args['frame']['height']) }} id="frame_h" aria-describedby="cframe_h">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="x_bin">X binning:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cx_bin">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ int(args['binning']['X']) }} id="x_bin" aria-describedby="cx_bin">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="y_bin">Y binning:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cy_bin">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ int(args['binning']['Y']) }} id="y_bin" aria-describedby="cy_bin">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-4'>
-                                    <button type="button" id="confccd" class="btn btn-primary btn-sm">Configure Readout</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
                                 <div class='form-group col-md-4'>
                                     <button type="button" id="confwfs" class="btn btn-primary btn-sm">Configure for WFS</button>
                                 </div>
-                                <div class='form-group col-md-4'>
-                                    <button type="button" id="confdefault" class="btn btn-primary btn-sm">Default Configuration</button>
-                                </div>
-                                <div class='form-group col-md-4'>
-                  
-                                </div>
+                            
+                           
                             </div>
                             <div data-custom-device="SBIG CCD" data-custom-vector="CONNECTION"></div>
                 			<div data-custom-device="SBIG CCD" data-custom-vector="CCD_EXPOSURE"></div>
-			                <div data-custom-device="SBIG CCD" data-custom-vector="SIMULATION"></div>
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME"></div>
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_BINNING"></div>
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_TEMPERATURE"></div>
@@ -294,6 +236,7 @@
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_COOLER_POWER"></div>
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME_TYPE"></div>
 			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_INFO"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="SIMULATION"></div>
 
                         </form>
                     </div>
