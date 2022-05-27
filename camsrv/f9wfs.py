@@ -3,7 +3,6 @@ MMTO F/9 WFS camera interface
 """
 
 import os
-import socket
 import time
 import pkg_resources
 
@@ -22,7 +21,6 @@ import logging.handlers
 
 from astropy.io import fits
 
-#from indiclient.indicam import SimCam, F9WFSCam
 
 from pyindi.webclient import INDIWebApp
 
@@ -85,21 +83,11 @@ class F9WFSsrv(CAMsrv):
                 self.write("None")
 
     def connect_camera(self):
-        # check the actual camera
+        # No need to do this anymore.
+        # Camera connection is done by pyindi
+        # we should remove as soon as we are
+        # sure this noop is not called anywhere.
         return
-        self.camera = None
-        try:
-            self.camera = F9WFSCam(host=self.camhost, port=self.camport)
-            self.camera.driver = "SBIG CCD"
-        except (ConnectionRefusedError, socket.gaierror):
-            log.warning("Can't connect to f9wfs camera host. Falling back to test server...")
-
-        # fall back to the test simulator server
-        if self.camera is None:
-            try:
-                self.camera = SimCam(host="localhost", port=self.camport)
-            except (ConnectionRefusedError, socket.gaierror):
-                log.error("Connection refused to local test server as well...")
 
     def save_latest(self):
         if self.latest_image is not None:
@@ -113,7 +101,7 @@ class F9WFSsrv(CAMsrv):
             (r"/default_config", self.DefaultModeHandler),
             (r"/latest_image_name", self.LatestImageNameHandler),
         ]
-        
+
         iwa = INDIWebApp(
             handle_blob=self.new_image,
             indihost="f9indi.mmto.arizona.edu",
