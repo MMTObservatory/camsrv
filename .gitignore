@@ -67,3 +67,5 @@ js9helper
 
 # FITS data
 fitsdata
+.env/
+passphrase

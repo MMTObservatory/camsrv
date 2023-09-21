@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Restarting</title>
+        <script type="text/javascript">
+            async function restart()
+            {
+                countdown(30)
+                response = await fetch("/restart_me", {method: "POST"})
+                console.log(response)
+                
+            }
+            function countdown(timer)
+            {
+                if (timer > 0)
+                {
+                    document.getElementById("timer").innerHTML = timer
+                    setTimeout(function(){ countdown(timer - 1) }, 1000)
+                }
+                else
+                {
+                    document.getElementById("timer").innerHTML = "0"
+                    window.location.href = "/"
+                }
+            }
+        </script>
+    </head>
+    <body onload="restart()">
+        <h1>Restarting</h1>
+        <p>Restarting this server in <span id="timer">30</span> seconds</p>
+        <p>You will be redirected to the f5wfs page as soon as this process is finished.</p>
+    </body>
+</html>
