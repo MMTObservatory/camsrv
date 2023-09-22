@@ -90,7 +90,7 @@ class F5WFSsrv(CAMsrv):
                 "7625")
 
             if driver == "Acquisition":
-                INDIPORT=7620
+                INDIPORT = 7620
 
             reader, writer = await asyncio.open_connection(
                 INDIHOST, INDIPORT)
@@ -142,7 +142,6 @@ class F5WFSsrv(CAMsrv):
                 })
             )
 
-
             body = response.body.decode()
 
             sbig_usb = "Santa Barbara Instrument Group SBIG Astronomy"
@@ -154,11 +153,7 @@ class F5WFSsrv(CAMsrv):
             if zwo_usb in body:
                 resp["zwo_connected"] = True
 
-
             self.finish(resp)
-
-
-
 
     class RestartMeHandler(tornado.web.RequestHandler):
         """
@@ -176,7 +171,7 @@ class F5WFSsrv(CAMsrv):
             password = base64.b64decode(password).decode()
             http_client = AsyncHTTPClient()
             self.finish("Restarting...")
-            response = await http_client.fetch(
+            _ = await http_client.fetch(
                 "http://f5wfs.mmto.arizona.edu:8080/api/run",
                 method="POST",
                 auth_username="",
@@ -185,7 +180,6 @@ class F5WFSsrv(CAMsrv):
                     "cmd": "lsusb"
                 })
             )
-
 
     class ImagePathHandler(tornado.web.RequestHandler):
         """
@@ -228,7 +222,6 @@ class F5WFSsrv(CAMsrv):
                     self.write(str(self.application.last_filename))
             else:
                 self.write("None")
-
 
     class HelpMeHandler(tornado.web.RequestHandler):
 

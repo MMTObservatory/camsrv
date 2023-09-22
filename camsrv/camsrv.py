@@ -286,7 +286,6 @@ class CAMsrv(tornado.web.Application):
             self.write(top_stats)
             self.finish()
 
-
     class MemHogHandler(tornado.web.RequestHandler):
         """
         Grab a snapshot of tracemalloc traceback for the biggest memory hog
