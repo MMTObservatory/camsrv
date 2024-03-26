@@ -24,8 +24,12 @@ from tornado.log import enable_pretty_logging
 from pathlib import Path
 
 from indiclient.indicam import SimCam
-
-from .header import update_header
+import os
+dev = os.environ.get("WFSDEV", False)
+if dev:
+    from header import update_header
+else:
+    from .header import update_header
 
 tracemalloc.start(25)
 
@@ -364,6 +368,7 @@ class CAMsrv(tornado.web.Application):
             (r"/js9\.min\.js(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9.min.js")),
             (r"/js9worker\.js(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "js9worker.js")),
             (r"/images/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "images")),
+            (r"/static/(.*)", tornado.web.StaticFileHandler, dict(path=parent / "static")),
             (r"/help/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "help")),
             (r"/plugins/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "plugins")),
             (r"/params/(.*)", tornado.web.StaticFileHandler, dict(path=js9_path / "params")),

@@ -15,7 +15,26 @@
     <script type="text/javascript" src="js9/js9support.min.js"></script>
     <script type="text/javascript" src="js9/js9.min.js"></script>
     <script type="text/javascript" src="js9/js9plugins.js"></script>
+
+    <!-- Load pyINDI scripts -->
+
+    <script src="/indi/static/js/constants.js"></script>
+    <script src="/indi/static/js/indi.js"></script>
+    <script src="/indi/static/js/builder-indi.js"></script>
+    <script src="/indi/static/js/updater-indi.js"></script>
+    <script src="/indi/static/js/logger-indi.js"></script>
+    <script src="/indi/static/js/utils-indi.js"></script>
+    <script src="/indi/static/js/maps-indi.js"></script>
+
+
+    <!-- Load pyINDI styling -->
+    <link rel="stylesheet" href="/indi/static/css/indi.css">
+
+
     <style type="text/css">
+        div.pyindi {
+      display: none
+      }
       #centerdiv {
           position: absolute;
           margin: auto;
@@ -41,7 +60,148 @@
       }
     </style>
     <title>F/9 Wavefront Sensor Camera Interface</title>
-<body>
+    <script>
+        /* Constants */
+        UserConfig = {};
+        UserConfig.CUSTOM_GUI = true; // Triggers to true if html is in body tag below
+        F9_GLOBALS = {COOLING:false, CCD_INFO:{}}
+
+        
+        /**
+        * Runs on load. Builds the default properties using a callback.
+        */
+        const main = () => {
+            // Tornado way of getting list
+            var devices =['*'];
+            initialize(devices, customGui=false);
+
+            return;
+        }
+
+
+        /**
+        * This function will be called whenever an INDI property with the device
+        *	{{ device_name }} is received. This is where users should modify the
+        *	code to append to specific objects.
+        *
+        *	If wanting to use a custom GUI, enable in the configuration and provide the correct syntax for selecting
+        * elements.
+        * @param {Object} indi Contains all information about INDI property
+        */
+        const handleProperty = (indi) => {
+            if (indi.op === IndiOp.DEFINITION) 
+            {
+                if(indi.name == "CCD_INFO")
+                {
+                    for(val of indi.values)
+                    {
+                        F9_GLOBALS.CCD_INFO[val['name']] = val.value
+                    }
+                }
+                if (!UserConfig.CUSTOM_GUI) 
+                {
+                    updater.handle(indi);
+                }
+                else 
+                {
+                    var vector = updater.custom(indi);
+                    // If returned vector is null, bad selector
+                    if (!vector) {
+                        return;
+                    }
+                    // Handle vector for the first time here
+                }
+            }
+            // Handle vector every time it comes in
+            var vector = updater.vector(indi);
+            if(indi.device === "SBIG CCD")
+            {
+                if(indi.name === "CCD1" && indi.op === IndiOp.SET)
+                {
+                    enable(STATE_EXPOSING);
+                    cmap = JS9.GetColormap();
+                    JS9.CloseImage();
+                    
+                    console.log("loading JS9")
+                    JS9.Load(indi.CCD1, {onload: function() {
+                            if (cmap != null) {
+                                JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
+                    
+                            };
+                            $.get("/latest_image_name", function(data){
+                                    $("span#image_name").text(data)
+                                    $("#progress").text("Exposure Done!");
+                                    $("#progress").css("border", "5px solid #080")
+                                    $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                                })
+                    }});
+                    $("#progress").css("width", "0%").text("");
+                    $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                    // if ($('#continuous').prop("checked")) {
+                    //    $('#expose').trigger('click');
+                    // };
+                }
+                else if(indi.name === "CCD_EXPOSURE" && indi.op === IndiOp.SET)
+                {
+                    $("#progress").addClass("progress-bar-striped progress-bar-animated");
+                    percent = 100 * (1-indi.CCD_EXPOSURE_VALUE/EXPOSING_TIME)
+                    $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
+                    if (percent > 99)
+                    {
+                        $("#progress").css("border", "5px solid #088")
+                        $("#progress").css("width", "100%").text("Reading Out...");
+                    }
+                    else
+                    {
+                        $("#progress").css("border", "none")
+                    }
+                }
+                else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
+                {
+                    if(indi.CONNECT == "On")
+                    {
+                        $("#connect").text("Connected").removeClass("btn-danger").addClass("btn-success")
+                    }
+                    else
+                    {
+                        $("#connect").text("NOT Connected").addClass("btn-danger").removeClass("btn-success")
+                    }
+                }
+                else if(indi.name === "CCD_COOLER" && indi.op === IndiOp.SET)
+                {
+                    console.log(indi);
+                    if(indi.COOLER_ON === "On")
+                    {
+                        F9_GLOBALS.COOLING = true;
+                        $("#cooling").prop("checked", true)
+                    }
+                    else
+                    {
+                        F9_GLOBALS.COOLING = false;
+                        $("#cooling").prop("checked", false)
+                    }
+                    enable(STATE_STARTING_COOL);
+                }
+                else if(indi.name === "CCD_TEMPERATURE" && indi.op === IndiOp.SET)
+                {
+                    $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C");
+                    enable(STATE_CFGING_TEMP);
+                }
+                else if(indi.name === "CCD_COOLER_POWER" && indi.op === IndiOp.SET)
+                {
+                    $('#cpower').html(indi.CCD_COOLER_VALUE.toFixed(1) + "%");
+
+                }
+                else if(indi.name === "CCD_INFO" && indi.op === IndiOp.SET)
+                {
+                    enable(STATE_FRAMING)
+                
+                }
+            }
+            return;
+        }
+    </script>
+<body onload="main()">
     <div class="page-header" align="center">
         <h1 class="display-4">F/9 Wavefront Sensor Camera Interface</h1>
     </div>
@@ -60,77 +220,32 @@
                     <div class="card-body">
                         <form>
                             <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_x">Lower X:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_x">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['X']) }} id="frame_x" aria-describedby="cframe_x">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_y">Lower Y:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_y">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ int(args['frame']['Y']) }} id="frame_y" aria-describedby="cframe_y">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_w">Width:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_w">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_X'] }} step=1 value={{ int(args['frame']['width']) }} id="frame_w" aria-describedby="cframe_w">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="frame_h">Height:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cframe_h">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=0 max={{ args['ccdinfo']['CCD_MAX_Y'] }} step=1 value={{ int(args['frame']['height']) }} id="frame_h" aria-describedby="cframe_h">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-3'>
-                                    <label for="x_bin">X binning:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cx_bin">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ int(args['binning']['X']) }} id="x_bin" aria-describedby="cx_bin">
-                                    </div>
-                                </div>
-                                <div class='form-group col-md-3'>
-                                    <label for="y_bin">Y binning:</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon" id="cy_bin">N/A</span>
-                                        <input class="form-control form-control-sm" type="number" min=1 max=20 step=1 value={{ int(args['binning']['Y']) }} id="y_bin" aria-describedby="cy_bin">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class='form-group col-md-4'>
-                                    <button type="button" id="confccd" class="btn btn-primary btn-sm">Configure Readout</button>
-                                </div>
-                            </div>
-                            <div class="form-row">
                                 <div class='form-group col-md-4'>
                                     <button type="button" id="confwfs" class="btn btn-primary btn-sm">Configure for WFS</button>
                                 </div>
-                                <div class='form-group col-md-4'>
-                                    <button type="button" id="confdefault" class="btn btn-primary btn-sm">Default Configuration</button>
-                                </div>
-                                <div class='form-group col-md-4'>
-                                    {% if args['status'] %}
-                                        <button type="button" id="connect" class="btn btn-success btn-sm">Connected</button>
-                                    {% else %}
-                                        <button type="button" id="connect" class="btn btn-danger btn-sm">NOT Connected</button>
-                                    {% end %}
-                                </div>
+                            
+                           
                             </div>
+                            <div data-custom-device="SBIG CCD" data-custom-vector="CONNECTION"></div>
+                			<div data-custom-device="SBIG CCD" data-custom-vector="CCD_EXPOSURE"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_BINNING"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_TEMPERATURE"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_TEMP_RAMP"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_COOLER"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_COOLER_POWER"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_FRAME_TYPE"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="CCD_INFO"></div>
+			                <div data-custom-device="SBIG CCD" data-custom-vector="SIMULATION"></div>
+
                         </form>
                     </div>
                 </div>
             </div>
+        <div class="row">
+
+            <button type="button" id="connect" class="btn btn-danger btn-sm">NOT Connected</button>
+        </div>
         <div class="row justify-content-left">
             <div class='col-md-10 align-self-left'>
                 <form class="form-inline">
@@ -145,13 +260,14 @@
                         </div>
                         <label for="settemp">Set Temp (˚C):</label>
                         <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
-                        <button id="conftemp" class="btn btn-primary btn-sm">Configure Temp</button>
+                        <button id="conftemp" type="button" class="btn btn-primary btn-sm">Configure Temp</button>
                     </div>
                 </form>
             </div>
         </div>
         <div class="row justify-content-left">
             <div class='col-md-10 align-self-left'>
+
                 <div class="form-inline">
                     <label for="ctemp"><b>Camera Temp:</b></label> <div id="ctemp">N/A ˚C</div>
                     <label for="cpower"><b>Cooling Power:</b></label> <div id="cpower">N/A%</div>
@@ -163,15 +279,7 @@
                 <form class="form-inline">
                     <div class="form-group">
                         <label for="exptype">Exposure Type:</label>
-                        <select class="form-control form-control-sm" id="exptype">
-                            {% for f in args['frame_types'] %}
-                                {% if f == 'Light' %}
-                                    <option selected value={{ f }}>{{ f }}</option>
-                                {% else %}
-                                    <option value={{ f }}>{{ f }}</option>
-                                {% end %}
-                            {% end %}
-                        </select>
+              
                         <label for="exptime">Exposure Time (sec):</label>
                         <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=1.0 value=10.0 id="exptime">
                         <button type="button" id="expose" class="btn btn-primary">Expose</button>
@@ -197,7 +305,14 @@
             var x = 384.;
             var y = 256.;
             var radius = 20.;
-            function disable() {
+            BUSY_STATUS = 0x00;
+            STATE_EXPOSING = 0x01;
+            STATE_CFGING_TEMP = 0x02;
+            STATE_STARTING_COOL = 0x04;
+            STATE_FRAMING = 0x08
+
+            function disable(STATE) {
+                BUSY_STATUS = BUSY_STATUS | STATE
                 $('#connect').prop("disabled", true);
                 $('#expose').prop("disabled", true);
                 $('#cooling').prop("disabled", true);
@@ -207,16 +322,22 @@
                 $('#confdefault').prop("disabled", true);
                 busy = true;
             };
-            function enable() {
-                $('#connect').prop("disabled", false);
-                $('#expose').prop("disabled", false);
-                $('#cooling').prop("disabled", false);
-                $('#conftemp').prop("disabled", false);
-                $('#confccd').prop("disabled", false);
-                $('#confwfs').prop("disabled", false);
-                $('#confdefault').prop("disabled", false);
-                busy = false;
+            function enable(STATE) {
+                BUSY_STATUS = BUSY_STATUS & (STATE ^ 0Xff)
+                //Only enable if all status bits are zero.
+                if ( BUSY_STATUS === 0x00 )
+                {
+                    $('#connect').prop("disabled", false);
+                    $('#expose').prop("disabled", false);
+                    $('#cooling').prop("disabled", false);
+                    $('#conftemp').prop("disabled", false);
+                    $('#confccd').prop("disabled", false);
+                    $('#confwfs').prop("disabled", false);
+                    $('#confdefault').prop("disabled", false);
+                    busy = false;
+                }
             };
+
             function updateProgress(exp, i) {
                 if (i > 0) {
                     percent = 100.0 * (exp - i) / exp
@@ -228,7 +349,37 @@
                     $("#progress").addClass("progress-bar-striped progress-bar-animated");
                 };
             };
+            $('#cooling').on('click', function() {
+                //let cooling_state = $("#cooling").prop("checked");
+                //For some reason checking the state of the
+                // radio button does not always return the correct sate
+                //!!!!????
+                //so we use the GLOBALS instead.
+
+                if(F9_GLOBALS.COOLING)
+                {//Turn it offf
+                    setindi("Switch", "SBIG CCD.CCD_COOLER", "COOLER_ON", "Off", "COOLER_OFF", "On");
+                }
+                else
+                {
+                    let temp = $("#settemp").val();
+                    setindi("Switch", "SBIG CCD.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
+                    setindi("Number", "SBIG CCD.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
+                }
+                disable(STATE_STARTING_COOL);
+
+            });
             $('#expose').on('click', function() {
+                disable(STATE_EXPOSING);
+                var exptype = $('#exptype').val();
+                var exptime = $('#exptime').val();
+                var filt = $('#filter').val();
+	        	EXPOSING_TIME=parseFloat(exptime);
+        		setindi("Number", "SBIG CCD.CCD_EXPOSURE", "CCD_EXPOSURE_VALUE", exptime)
+                var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
+
+            });
+/*            $('#expose').on('click', function() {
                 disable();
                 var exptype = $('#exptype').val();
                 var exptime = $('#exptime').val();
@@ -254,6 +405,7 @@
                 var exp = parseFloat(exptime);
                 updateProgress(exp, i);
             });
+
             $('#cooling').on('click', function() {
                 disable();
                 $.get("cooling", function(data, status) {
@@ -288,23 +440,50 @@
                     enable();
                 });
             });
-            $('#confwfs').on('click', function(){
-                disable();
-                $.get("wfs_config", function(){
-                    enable();
-                });
+*/
+            $('#conftemp').on('click', function(){
+               let temp = $('#settemp').val()
+                setindi("Number", "SBIG CCD.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
+              
             });
-            $('#confdefault').on('click', function(){
+            $('#confwfs').on('click', function(){
+                disable(STATE_FRAMING);
+                let diff = F9_GLOBALS.CCD_INFO.CCD_MAX_X - F9_GLOBALS.CCD_INFO.CCD_MAX_Y
+                let X = parseInt(diff/6);
+                let Y = 0;
+                let BINNING_X = 3
+                let BINNING_Y = 3
+                console.log(
+                    F9_GLOBALS.CCD_INFO.CCD_MAX_X, F9_GLOBALS.CCD_INFO.CCD_MAX_Y,
+                    "X", X,
+                    "Y", Y,
+                    "WIDTH",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y,
+                    "HEIGHT",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y
+                )
+                setindi("Number", "SBIG CCD.CCD_BINNING", 
+                    "HOR_BIN", BINNING_X,
+                    "VER_BIN", BINNING_Y,
+                );
+                setindi("Number", "SBIG CCD.CCD_FRAME",
+                    "X", X,
+                    "Y", Y,
+                    "WIDTH",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y,
+                    "HEIGHT", F9_GLOBALS.CCD_INFO.CCD_MAX_Y 
+                );
+            });
+/*            $('#confdefault').on('click', function(){
                 disable();
                 $.get("default_config", function(){
                     enable();
                 });
             });
-            $('#connect').on('click', function(){
-                alert("Run 'mmtserv f9wfs restart' from terminal to reset camera connection");
-            });
+*/
 
+            $('#connect').on('click', function(){
+                setindi("Switch", "SBIG CCD.CONNECTION", "CONNECT", "On", "DISCONNECT", "Off");
+            });
             (function update() {
+                return
                 $.getJSON("status", {format: "json"}).done(function(data) {
                     if (busy == false) {
                         $('#ctemp').html(data['temperature'] + " ˚C");
@@ -336,13 +515,22 @@
 
         </script>
         <div class='row'>
-            <div class='col-12'>
-                <div class="JS9Menubar" data-width="900px"></div>
-                <div class="JS9" data-width="900px" data-height="900px"></div>
-                <div style="margin-top: 2px;"><div class="JS9Colorbar" data-width="900px"></div>
+
+        </div>
+        <div class='row'>
+            <div class='col-7'>
+                <div class="JS9Menubar" id="myJS9Menubar" data-width="900px"></div>
+
+                <div class="JS9" data-width="900px" data-height="900px" id=myJS9></div>
+                <div style="margin-top: 2px;"></div>
+                <div class="JS9Colorbar" id="myJS9Colorbar" data-width="900px"></div>
+
+            </div>
+            <div class='col-3'></div>
+            <div class='col-2'>
+                <div class="JS9Magnifier" id="myJS9Magnifier"></div>
             </div>
         </div>
-
     </div>
 </body>
 </html>

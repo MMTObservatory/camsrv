@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="js9/js9support.css">
+    <link type="text/css" rel="stylesheet" href="js9/js9.css">
+    <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+    <link rel="apple-touch-icon" href="/images/js9-apple-touch-icon.png">
+    <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/popper.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js9/js9support.min.js"></script>
+    <script type="text/javascript" src="js9/js9.min.js"></script>
+    <script type="text/javascript" src="js9/js9plugins.js"></script>
+
+
+    <!-- Load pyINDI scripts -->
+
+    <script src="/indi/static/js/constants.js"></script>
+    <script src="/indi/static/js/indi.js"></script>
+    <script src="/indi/static/js/builder-indi.js"></script>
+    <script src="/indi/static/js/updater-indi.js"></script>
+    <script src="/indi/static/js/logger-indi.js"></script>
+    <script src="/indi/static/js/utils-indi.js"></script>
+    <script src="/indi/static/js/maps-indi.js"></script>
+
+
+        <!-- Load pyINDI styling -->
+    <link rel="stylesheet" href="/indi/static/css/indi.css">
+
+    <style type="text/css">
+      div.pyindi {
+      display: none
+      }
+      span#image_name{
+        padding-left:10px;
+      }
+      #centerdiv {
+          position: absolute;
+          margin: auto;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          LEFT: 0;
+          width: 900px;
+          height: 900px;
+      }
+      .form-inline label {
+          margin-left: 15px;
+          margin-right: 10px;
+      }
+      .form-check label {
+          margin-left: 10px;
+      }
+      .form-inline button {
+          margin-left: 10px;
+      }
+      .row {
+          margin-top: 20px;
+      }
+      li {
+            margin-bottom: 10px;
+      }
+      img {
+        margin-top:10px;
+        margin-bottom: 10px;
+      }
+    </style>
+    <title>F/5 WFS Help Page</title>
+
+<body>
+    <div class="page-header" align="center">
+        <h1 class="display-4">F/5 WFS Help Page</h1>
+    </div>
+        <div>
+
+        </div>
+		<div id="indicontainer" style="display:none">
+
+		</div>
+    <div class="container">
+        <div id="accordion" role="tablist">
+            <div class="card">
+                <div class="card-header" role="tab" id="eng_heading">
+                    <h5 class="mb-0">
+                        <a class="collapsed" data-toggle="collapse" href="#collapse_reg" aria-expanded="false" aria-controls="collapse_reg">
+                            Trouble Shooting
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_reg" class="collapse" role="tabpanel" aria-labelledby="eng_heading" data-parent="#accordion">
+                    <div class="card-body">
+                        <h3>WFS Camera Image does not appear in webpage after exposing</h3>
+                        <ol>
+			                <li>ssh into hacksaw and type mmtserv f5wfs restart</li>
+                            <li>Refresh the f5wfs page.</li>
+                            <li>Reconnect the camera</li>
+                            <li>Try to take an image again.</li>
+                            <li>Power Cycle the "SBIG" camera in the power gui on the telescope operator computer.</li>
+                            <li>Refresh the webpage, reconnect the camera, and try to take an image again.</li>
+                            <li>Try to take an image again.</li>
+                            <li>Click the restart camera driver in the WFS Camera Engineering webpage.</li>
+                            <li>Refresh the webpage, reconnect the camera, and try to take an image again.</li>
+                            <li>In a terminal, login to the f5wfs as mmtop.</li>
+                                <ul>
+                                    <li><i>ssh mmtop@f5wfs.mmto.arizona.edu</i></li>
+                                    <li>Ask Scott for password (same as pixel2 login).</li>
+                                    <li>Type: <i>sudo /usr/bin/systemctl restart start-indiserver.service</i> </li>
+                                </ul>
+                            <li>Try to take an image again.</li>
+                            <li>Reboot the f5wfs camera computer.</li>
+                                <ul>
+                                    <li><i>ssh mmtop@f5wfs.mmto.arizona.edu</i></li>
+                                    <li><i>sudo /usr/sbin/reboot </i></li>
+                                    <li> in a new terminal ping f5wfs.mmto.arizona.edu.</li>
+                                    <li>When the ping is successful, refresh the f5wfs page.</li>
+                                    <li>Click the "Not Connected" button.</li>
+                                    <li>If you are using the ZWO Acquisition camerayou will have to reconnect it as well.</li>
+                                </ul>
+
+                        </ol>
+
+                        <h3>ZWO Acquisition camera does not connect successfully in kstars</h3>
+                                <ul>
+                                    <li>Reboot f5wfs.mmto.arizona.edu</li>
+                                    <ul>
+                                        <li><i>ssh mmtop@f5wfs.mmto.arizona.edu</i></li>
+                                        <li><i>sudo /usr/sbin/reboot </i></li>
+                                        <li> in a new terminal ping f5wfs.mmto.arizona.edu.</li>
+                                        <li>When the ping is successful, refresh the f5wfs page</li>
+                                        <li>You will have to reconnect the WFS camera as well by refreshing that page and clicking the "Not Connected" button.</li>
+                                    </ul>
+                                </ul>
+
+                        
+                        <h3>No stars appear in the ZWO or WFS cameras even though we are pointed at one with significant magnitude</h3>
+                        <ul>
+                            <li>Verify focus is not too far off.</li>
+                            <li>Rehome the WFS stages.</li>
+                            <li>Set to hecto configuration.</li>
+                            <li>Try again</li>
+                        </ul>
+
+                        <h3>The WFS Computer is unresponsive</h3>
+                        <ul>
+                            <li>Verify that you can't ping wavefront.mmto.arizona.edu.</li>
+                            <li>Verify the VNC to wavefront is not working.</li>
+                            <li>Check to see the number 7 & 8 on pullizi P7 and number 4 on P5 is on. </li>
+                            <li>If all the above checks out, we start powercycling in Rack in 2West</li>
+                            <ul>
+                                <li>Power down number 7 & 8 on pullizi P7 and number 4 on P5.</li>
+                                <li> Wait one minute.</li>
+                                <li> Power up number 7 on P7.</li>
+                                <li>Wait 30 seconds.</li>
+                                <li>Power up number 8 on P7 and Number 5 on P5.</li>
+                            </ul>
+                            <li>Try connecting with VNC and/or pinging wfspc again.</li>
+                        </ul>
+                        <form>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" role="tab" id="topbox_heading">
+                    <h5 class="mb-0">
+                        <a class="collapsed" data-toggle="collapse" href="#collapse_tp" aria-expanded="false" aria-controls="collapse_tp">
+                            Description of the f5wfs system
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_tp" class="collapse" role="tabpanel" aria-labelledby="topbox_heading" data-parent="#accordion">
+                    <div class="card-body">
+                            <h3>There are three cameras in the wfs topbox:</h3>
+                            <dl>
+                                <dt>SBIG WFS camera</dt>
+                                    <dd> - This camera is used to take images of the WFS field. It is connected to the f5wfs computer via a usb cable. The camera is controlled by the indi driver through the f5wfs webpage.</dd>
+                                <dt>zwo asi acquisition camera</dt>
+                                    <dd> - This is the new acquisition camera controled by kstars. It replaced StellaCam in the topbox. It is also connected to the f5wfs computer via a USB cable. </dd>
+                                <dt>apogee mmtcam</dt>
+                                    <dd> - the science camera</dd>
+                            </dl>
+                            <h3>There are two computers associated with the wfs topbox:</h3>
+                            <dl>   
+                                <dt>wfspc (wavefront.mmto.arizona.edu)</dt>
+                                <dd> - This the old windows xp computer that sits in the topbox. it controls the puntino, topbox stages and the labjack. it no longer controls the wfs sbig camera.</dd>
+                                <dt>f5wfs (f5wfs.mmto.arizona.edu)</dt>
+                                <dd> - This is the new linux computer that sits in 3e. it controls the wfs sbig camera and the zwo acquisition camera with indi drivers. It is connected to the topbox via an icron unit.</dd>
+                                
+
+                        <form>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" role="tab" id="topbox_heading">
+                    <h5 class="mb-0">
+                        <a class="collapsed" data-toggle="collapse" href="#collapse_zwo" aria-expanded="false" aria-controls="collapse_tp">
+                            Using the ZWO Acquisition Camera with kstars
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_zwo" class="collapse" role="tabpanel" aria-labelledby="topbox_heading" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul> 
+                            <li>Open kstars by typing "kstars" in a terminal clicking the activities button in the top left and typing kstars</li>  
+                            <li>In the KStars main window goto Tools -> Device Manager.</li>
+                            <li>You may get a warning pop up that you can set to never show again and click continue.</li>
+                            <li>You will only need to do these steps onces</li>
+                            <ul>
+                                <li>From the device manager, goto the client tab, and if "Acquisition" listed, click Modify and use the new address and port below. If "Acquisition" is not listed, click the Add button on the right side. Add these items:</li>
+                                <ul>
+                                    <li>name = Acquisition</li>
+                                    <li>Host = f5wfs.mmto.arizona.edu </li>
+                                    <li>Port = 7624</li>
+                                </ul>
+                                <li>Click OK.</li>
+                            </ul>
+                        </ul>
+                        <ul>
+                            <li>Click the "Connect" button.</li>
+                            <li>You should see a pop up window with several tabs. On the main control tab, click connect</li>
+                            <li>On the far right there should be a tab labeled "Streaming". You may need to scroll over with the arrow button.</li>
+                            <li>In the streaming tab you should see a stream on button. Click it to open the streaming image window.</li>
+                        </ul>
+                    
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                <div class="card-header" role="tab" id="topbox_heading">
+                    <h5 class="mb-0">
+                      <a class="collapsed" data-toggle="collapse" href="#collapse_reboot" aria-expanded="false" aria-controls="collapse_reboot">
+                            Reboot the f5wfs computer
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_reboot" class="collapse" role="tabpanel" aria-labelledby="topbox_heading" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul>
+                            <li><i>ssh mmtop@f5wfs.mmto.arizona.edu</i></li>
+                            <li><i>sudo /usr/sbin/reboot </i></li>
+                            <li> in a new terminal ping f5wfs.mmto.arizona.edu.</li>
+                            <li>Wait for ping to be succesfull.</li>
+                            <li>You will need to reconnect the ZWO and SBIG cameras</li>
+                        </ul>                               
+
+                        <form>
+                        </form>
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                <div class="card-header" role="tab" id="topbox_heading">
+                    <h5 class="mb-0">
+                        <a class="collapsed" data-toggle="collapse" href="#collapse_checkout" aria-expanded="false" aria-controls="collapse_reboot">
+                            F5 WFS Checkout Procedure
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapse_checkout" class="collapse" role="tabpanel" aria-labelledby="topbox_heading" data-parent="#accordion">
+                    <div class="card-body">
+                        <h3>Power on the Topbox</h3>
+                        <ul>
+                            <li>Power on the main switch in 2 West to power the rack</li>
+                            <li>Power on #5 on P5 (Estop 24V) and #7 on P7 (WFS CTRL AC) </li>
+                            <li>Wait 30 Seconds</li>
+                            <li>Power #5 on P7 (WFS DRV AC)</li>
+                            <li>Ping wavefront.mmto.arizona.edu form any computer on the network</li>
+                            <img src="/static/wfs pullizis.png">
+
+                        </ul>
+                        <h3>Reboot f5wfs computer</h3>
+                        See instructions above.
+                        <h3>Home and configure the Topbox</h3>
+                        <ul>
+                            <li>VNC into <a href="http://ops2.mmto.arizona.edu:4240/vnc_mallet1.html" target="_blank">Mallet </a>ask Scott S. or Carlos for password.</li>
+                            <li>In the "MMTOP GUI LAUNCHER" click WFS-> F/5 WFS For Hecto. Several window should open.</li>
+                            <li>In the WAVESERV Motion Control GUI Click "Power" on The top right. A new GUI should open. </li>
+                                <img src="/static/Power.png">
+                                <ul>
+                                    <li>In This GUI there are several buttons to toggle power. Red means the power is off Green means the power is on. Turn off Apogee and turn on Servo, Encoder, SBIG and Puntino.</li>
+                                </ul>
+                            <li>In the "F/5 WFS Interface for Hecto" GUI click on the "Control" menu and then "Confgure WFS"</li>
+                            <img src="/static/WFS Iface for Hecto (menu).png">
+                            <li>In the F/5 WFS configuration window click Home WFS. You should see the axes in the "WAVESERV Motion Control" GUI move. It will take about 3 minutes to home.</li>
+                            <img src="/static/Home WFS.png">
+                            <li>After it has homed, click the "Set to Default Hecto Configuration"</li>
+                        </ul>
+                        <h4>Note: Close all windows on mallet after the homing and configuration process is finished.</h4>
+                        <h3>Checkout the WFS Camera</h3>
+                        <ul>
+                            <li>Go to <a target="_blank" href="/">the WFS Camera Webpage</a></li>
+                            <li>Click on the "Not Connected" button</li>
+                            <li>Set the Exposure time to 1.0</li>
+                            <li>Click enable cooling</li>
+                            <li>Click the Expose button and verify that an image comes through.</li>
+                        </ul>
+                        <h3>Checkout the ZWO Camera</h3>
+                        <ul> 
+                            <li>Open kstars by typing "kstars" in a terminal clicking the activities button in the top left and typing kstars</li>  
+                            <li>In the KStars main window goto Tools -> Device Manager.</li>
+                            <li>You may get a warning pop up that you can set to never show again and click continue.</li>
+                        </ul>
+                        <ul>
+                            <li>Click the "Connect" button.</li>
+                            <li>You should see a pop up window with several tabs. On the main control tab, click connect</li>
+                            <li>On the far right there should be a tab labeled "Streaming". You may need to scroll over with the arrow button.</li>
+                            <li>In the streaming tab you should see a stream on button. Click it to open the streaming image window.</li>
+                        </ul>
+                            
+
+
+                        <form>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+       </div>
+
+
+
+
+
+    </div>
+</body>
+</html>
