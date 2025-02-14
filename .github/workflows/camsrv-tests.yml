@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-ver: [8, 9]
+        python-ver: [12, 13]
         tox-env: [cov, astropylts, astropydev]
     steps:
     - uses: actions/checkout@v2
@@ -47,7 +47,7 @@ jobs:
     - name: Set up Python to test links in docs with sphinx
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.13
     - name: Install base dependencies
       run: |
         python -m pip install --upgrade pip
@@ -64,7 +64,7 @@ jobs:
     - name: Set up Python to build docs with sphinx
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.13
     - name: Install base dependencies
       run: |
         python -m pip install --upgrade pip
@@ -81,7 +81,7 @@ jobs:
     - name: Python codestyle check
       uses: actions/setup-python@v2
       with:
-        python-version: 3.9
+        python-version: 3.13
     - name: Install base dependencies
       run: |
         python -m pip install --upgrade pip

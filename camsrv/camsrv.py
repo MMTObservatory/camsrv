@@ -2,10 +2,11 @@
 Base classes for MMTO camera interface systems
 """
 
+import importlib.resources
 import io
 import socket
 import json
-import pkg_resources
+import importlib
 
 from scipy.ndimage import median_filter
 
@@ -21,8 +22,6 @@ import tornado.ioloop
 import tornado.websocket
 from tornado.log import enable_pretty_logging
 
-from pathlib import Path
-
 from indiclient.indicam import SimCam
 import os
 dev = os.environ.get("WFSDEV", False)
@@ -37,7 +36,7 @@ enable_pretty_logging()
 
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
-log = logging.getLogger('tornado.application')
+log = logging.getLogger("tornado.application")
 log.setLevel(logging.INFO)
 
 SIMSRVPORT = 8788
@@ -321,7 +320,7 @@ class CAMsrv(tornado.web.Application):
         pass
 
     def __init__(self, camhost="localhost", camport=7624, connect=True):
-        parent = Path(pkg_resources.resource_filename(__name__, "web_resources"))
+        parent = importlib.resources.files("camsrv") / "web_resources"
         template_path = parent / "templates"
         static_path = parent / "static"
         js9_path = parent / "js9"

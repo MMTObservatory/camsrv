@@ -4,7 +4,7 @@ MMTO F/9 WFS camera interface
 
 import os
 import time
-import pkg_resources
+import importlib
 
 import tornado
 import tornado.web
@@ -125,7 +125,8 @@ class F9WFSsrv(CAMsrv):
         self.requested_temp = -25.0
         self.default_exptime = 10.0
 
-        bp_file = pkg_resources.resource_filename(__name__, os.path.join("data", "f9_mask.fits"))
+        bp_file = importlib.resources.files(__name__) / "data" / "f9_mask.fits"
+
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
 

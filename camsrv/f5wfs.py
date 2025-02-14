@@ -2,10 +2,11 @@
 MMTO F/5 WFS camera interface
 """
 
+import importlib.resources
 import os
 import time
 import asyncio
-import pkg_resources
+import importlib
 import tornado
 import tornado.web
 import tornado.httpserver
@@ -288,10 +289,8 @@ class F5WFSsrv(CAMsrv):
         self.default_exptime = 10.0
 
         # We have to make one for f5
-        bp_file = pkg_resources.resource_filename(
-            __name__,
-            os.path.join("data", "f5_mask.fits")
-        )
+        bp_file = importlib.resources.files(__name__) / "data" / "f5_mask.fits"
+
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
 
