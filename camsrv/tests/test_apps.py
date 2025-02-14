@@ -1,6 +1,7 @@
 """
 Sanity checks to make sure applications can be instantiated
 """
+
 from tornado.testing import AsyncHTTPTestCase, gen_test
 
 from ..camsrv import CAMsrv
@@ -16,7 +17,7 @@ class TestSimSrv(AsyncHTTPTestCase):
 
     @gen_test
     def test_homepage(self):
-        response = yield self.http_client.fetch(self.get_url('/'))
+        response = yield self.http_client.fetch(self.get_url("/"))
         self.assertEqual(response.code, 200)
 
 
@@ -26,11 +27,11 @@ class TestConnected(AsyncHTTPTestCase):
         return app
 
     def test_read_then_disconnect(self):
-        response = self.fetch('/status')
+        response = self.fetch("/status")
         self.assertEqual(response.code, 200)
         self.assertIn(b"temperature", response.body)
 
-        response = self.fetch('/disconnect')
+        response = self.fetch("/disconnect")
         self.assertEqual(response.code, 200)
 
 

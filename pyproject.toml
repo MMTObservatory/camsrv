@@ -24,6 +24,8 @@ test = [
     "tox",
     "coverage",
     "pytest-astropy",
+    "black",
+    "flake8",
 ]
 docs = [
     "sphinx-astropy",

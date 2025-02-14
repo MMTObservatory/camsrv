@@ -19,12 +19,12 @@ from .camsrv import CAMsrv
 
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
-log = logging.getLogger('tornado.application')
+log = logging.getLogger("tornado.application")
 log.setLevel(logging.INFO)
 
 MATCAMPORT = 8786
 
-__all__ = ['MATsrv', 'main']
+__all__ = ["MATsrv", "main"]
 
 
 class MATsrv(CAMsrv):
@@ -47,7 +47,9 @@ class MATsrv(CAMsrv):
 
     def save_latest(self):
         if self.latest_image is not None:
-            filename = self.datadir / Path("matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
+            filename = self.datadir / Path(
+                "matcam_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
+            )
             self.latest_image.writeto(filename)
 
     def __init__(self, camhost="matcam", camport=7624, connect=True):
@@ -55,8 +57,8 @@ class MATsrv(CAMsrv):
 
         self.home_template = "matcam.html"
 
-        if 'MATCAMROOT' in os.environ:
-            self.datadir = Path(os.environ['MATCAMROOT'])
+        if "MATCAMROOT" in os.environ:
+            self.datadir = Path(os.environ["MATCAMROOT"])
         else:
             self.datadir = Path("/mmt/matcam/latest")
 

@@ -3,11 +3,9 @@
 # get picked up when running the tests inside an interpreter using
 # packagename.test
 
-import os
-
-
 try:
     from pytest_astropy_header.display import TESTED_VERSIONS
+
     ASTROPY_HEADER = True
 except ImportError:
     ASTROPY_HEADER = False
@@ -20,4 +18,5 @@ def pytest_configure(config):
         config.option.astropy_header = True
 
         from camsrv import __version__
+
         TESTED_VERSIONS["camsrv"] = __version__

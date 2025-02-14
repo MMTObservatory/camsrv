@@ -1,6 +1,7 @@
 """
 Interface to the F/5-hecto WFS hardware via the waveserv MSG server
 """
+
 import logging
 from enum import Enum
 
@@ -20,12 +21,10 @@ class F5WFS_Power(MSGClient):
     Interface to the MSG server that operates the networked power switch that feeds
     the F/5 WFS hardware.
     """
+
     def __init__(self, host="localhost", port=4447):
         super(F5WFS_Power, self).__init__(host=host, port=port)
-        self.switches = {
-            "computer": "wfs_control",
-            "drives": "wfs_drive"
-        }
+        self.switches = {"computer": "wfs_control", "drives": "wfs_drive"}
 
     @property
     async def power(self, switch):
@@ -49,7 +48,11 @@ class F5WFS_Power(MSGClient):
             return
         status = await self.run(self.switches[switch], state.value)
         if status:
-            logging.debug(f"Successfully set {self.switches[switch]} to {state.value} on WFS power switch server")
+            logging.debug(
+                f"Successfully set {self.switches[switch]} to {state.value} on WFS power switch server"
+            )
         else:
-            logging.debug(f"Unable to set {self.switches[switch]} to {state.value} on WFS power switch server")
+            logging.debug(
+                f"Unable to set {self.switches[switch]} to {state.value} on WFS power switch server"
+            )
         return status
