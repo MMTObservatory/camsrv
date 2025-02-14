@@ -1,6 +1,7 @@
 """
 MSG-based Interface to the F/5-hecto WFS camera
 """
+
 import io
 import asyncio
 import logging
@@ -18,6 +19,7 @@ class CamState(Enum):
     """
     Enumerate possible camera states
     """
+
     Idle = auto()
     Exposing = auto()
     Read = auto()
@@ -29,6 +31,7 @@ class Cooler(Enum):
     """
     Enumerate possible camera cooler states
     """
+
     off = 0
     on = 1
 
@@ -37,6 +40,7 @@ class ExpType(Enum):
     """
     Enumerate possible exposure types
     """
+
     light = "light"
     dark = "dark"
 
@@ -51,10 +55,10 @@ class F5WFS_Cam(MSGClient):
         Get basic info about the CCD
         """
         info = {
-            'CCD_MAX_X': 512,
-            'CCD_MAX_Y': 512,
-            'CCD_PIXEL_SIZE': 20,
-            'CCD_BITSPERPIXEL': 16
+            "CCD_MAX_X": 512,
+            "CCD_MAX_Y": 512,
+            "CCD_PIXEL_SIZE": 20,
+            "CCD_BITSPERPIXEL": 16,
         }
         return info
 
@@ -172,15 +176,15 @@ class F5WFS_Cam(MSGClient):
         rawreply = await self.reader.readline()
         # pull the first line to parse out how many bytes we need to read
         reply_data = rawreply.decode().split()
-        if reply_data[1] == 'blk':
+        if reply_data[1] == "blk":
             nbytes = int(reply_data[2])
             logging.debug(f"Ready to transfer {nbytes} of FITS data")
             fits_blob = await self.reader.readexactly(nbytes)
             hdulist = fits.open(io.BytesIO(fits_blob))
             status = await self.idle()
             hdr = hdulist[0].header
-            hdr['CAMTEMP'] = await self.temperature
-            hdr['CAMSETP'] = await self.setpoint
+            hdr["CAMTEMP"] = await self.temperature
+            hdr["CAMSETP"] = await self.setpoint
             return hdulist
         else:
             logging.error(f"Failed reply to fits command: {reply_data}")

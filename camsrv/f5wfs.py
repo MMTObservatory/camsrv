@@ -2,10 +2,11 @@
 MMTO F/5 WFS camera interface
 """
 
+import importlib.resources
 import os
 import time
 import asyncio
-import pkg_resources
+import importlib
 import tornado
 import tornado.web
 import tornado.httpserver
@@ -35,7 +36,7 @@ else:
 enable_pretty_logging()
 logger = logging.getLogger("")
 logger.setLevel(logging.INFO)
-log = logging.getLogger('tornado.application')
+log = logging.getLogger("tornado.application")
 log.setLevel(logging.INFO)
 
 if dev:
@@ -43,7 +44,7 @@ if dev:
 else:
     F5WFSPORT = 8989
 
-__all__ = ['F5WFSsrv', 'main']
+__all__ = ["F5WFSsrv", "main"]
 
 
 class F5WFSsrv(CAMsrv):
@@ -54,6 +55,7 @@ class F5WFSsrv(CAMsrv):
 
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
+
         def get(self):
             cam = self.application.camera
             log.info("Configuring f/5 WFS camera for WFS observations...")
@@ -64,10 +66,13 @@ class F5WFSsrv(CAMsrv):
         Deprecated and should be deleted in future commits.
         Configure CCD to be in WFS mode, square with 3x3 binnind
         """
+
         def get(self):
             cam = self.application.camera
-            log.info("Setting f/5 WFS camera to its\
-                 default configuration, full-frame with 1x1 binning...")
+            log.info(
+                "Setting f/5 WFS camera to its\
+                 default configuration, full-frame with 1x1 binning..."
+            )
             cam.default_config()
 
     class ResetDriverHandler(tornado.web.RequestHandler):
@@ -82,24 +87,16 @@ class F5WFSsrv(CAMsrv):
             program to send restart commands to the driver.
             """
             driver = self.get_argument("NAME", "F/5 WFS")
-            INDIHOST = os.environ.get(
-                "INDIF5WFSHOST",
-                "f5wfs.mmto.arizona.edu")
-            INDIPORT = os.environ.get(
-                "INDIF5WFSPORT",
-                "7625")
+            INDIHOST = os.environ.get("INDIF5WFSHOST", "f5wfs.mmto.arizona.edu")
+            INDIPORT = os.environ.get("INDIF5WFSPORT", "7625")
 
             if driver == "Acquisition":
                 INDIPORT = 7620
 
-            reader, writer = await asyncio.open_connection(
-                INDIHOST, INDIPORT)
-            json_data = dict(
-                action="restart_drivers",
-                args=[driver]
-            )
+            reader, writer = await asyncio.open_connection(INDIHOST, INDIPORT)
+            json_data = dict(action="restart_drivers", args=[driver])
 
-            writer.write(json.dumps(json_data).encode() + b'\n')
+            writer.write(json.dumps(json_data).encode() + b"\n")
 
             resp = await reader.readline()
             try:
@@ -122,6 +119,7 @@ class F5WFSsrv(CAMsrv):
         is reset you will have to update the password here.
 
         """
+
         async def get(self):
             restart_f5wfs = self.get_argument("restart", False)
 
@@ -137,9 +135,7 @@ class F5WFSsrv(CAMsrv):
                 method="POST",
                 auth_username="",
                 auth_password=password,
-                body=urllib.parse.urlencode({
-                    "cmd": cmd
-                })
+                body=urllib.parse.urlencode({"cmd": cmd}),
             )
 
             body = response.body.decode()
@@ -159,6 +155,7 @@ class F5WFSsrv(CAMsrv):
         """
         Restart this webserver using the mmtserv interface.
         """
+
         async def get(self):
             self.render("restart.html")
 
@@ -176,9 +173,7 @@ class F5WFSsrv(CAMsrv):
                 method="POST",
                 auth_username="",
                 auth_password=password,
-                body=urllib.parse.urlencode({
-                    "cmd": "lsusb"
-                })
+                body=urllib.parse.urlencode({"cmd": "lsusb"}),
             )
 
     class ImagePathHandler(tornado.web.RequestHandler):
@@ -238,15 +233,13 @@ class F5WFSsrv(CAMsrv):
     def save_latest(self):
         log.info("Saving latest")
         if self.latest_image is not None:
-            imagename = Path(
-                "f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits"
-            )
+            imagename = Path("f5wfs_" + time.strftime("%Y%m%d-%H%M%S") + ".fits")
             filename = self.datadir / imagename
             self.last_filename = filename
             log.info(f"saving to {filename}")
             self.latest_image.writeto(filename)
 
-    def __init__(self, camhost='badname', camport=7624, connect=False):
+    def __init__(self, camhost="badname", camport=7624, connect=False):
         self.extra_handlers = [
             (r"/wfs_config", self.WFSModeHandler),
             (r"/default_config", self.DefaultModeHandler),
@@ -260,26 +253,22 @@ class F5WFSsrv(CAMsrv):
         ]
 
         iwa = INDIWebApp(
-            handle_blob=self.new_image,
-            indihost="f5wfs.mmto.arizona.edu",
-            indiport=7624
+            handle_blob=self.new_image, indihost="f5wfs.mmto.arizona.edu", indiport=7624
         )
 
         self.extra_handlers.extend(iwa.indi_handlers())
         self.indiargs = {"device_name": ["*"], "DEFAULT_TEMP": -10.0}
 
         super(F5WFSsrv, self).__init__(
-            camhost=camhost,
-            camport=camport,
-            connect=connect
+            camhost=camhost, camport=camport, connect=connect
         )
 
         self.home_template = "f5wfs.html"
 
-        if 'WFSROOT' in os.environ:
-            self.datadir = Path(os.environ['WFSROOT'])
-        elif 'HOME' in os.environ:
-            self.datadir = Path(os.environ['HOME']) / "wfsdat"
+        if "WFSROOT" in os.environ:
+            self.datadir = Path(os.environ["WFSROOT"])
+        elif "HOME" in os.environ:
+            self.datadir = Path(os.environ["HOME"]) / "wfsdat"
         else:
             self.datadir = Path("wfsdat")
 
@@ -288,10 +277,8 @@ class F5WFSsrv(CAMsrv):
         self.default_exptime = 10.0
 
         # We have to make one for f5
-        bp_file = pkg_resources.resource_filename(
-            __name__,
-            os.path.join("data", "f5_mask.fits")
-        )
+        bp_file = importlib.resources.files(__name__) / "data" / "f5_mask.fits"
+
         with fits.open(bp_file) as hdulist:
             self.bad_pixel_mask = hdulist[0].data.astype(bool)
 
@@ -304,7 +291,7 @@ class F5WFSsrv(CAMsrv):
         The blob object from the indidriver in this case it is the
         image from the sbig wfs camera.
         """
-        buff = io.BytesIO(blob['data'])
+        buff = io.BytesIO(blob["data"])
         hdulist = fits.open(buff)
         if hdulist is not None:
             hdulist = update_header(hdulist)
