@@ -46,11 +46,8 @@ Documentation = "https://camsrv.readthedocs.io/"
 include-package-data = true
 
 [tool.setuptools.package-data]
-camsrv = [
-    "data/*",
-    "web_resources/*/*",
-    "web_resources/bootstrap/*/*",
-]
+"camsrv.data" = ["**"]
+"camsrv.web_resources" = ["**"]
 
 [tool.setuptools.packages]
 find = {}
