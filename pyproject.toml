@@ -48,6 +48,7 @@ include-package-data = true
 [tool.setuptools.package-data]
 "camsrv.data" = ["**"]
 "camsrv.web_resources" = ["**"]
+"camsrv.web_resources.templates" = ["**"]
 
 [tool.setuptools.packages]
 find = {}
