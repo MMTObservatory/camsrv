@@ -7,11 +7,8 @@
     <link type="text/css" rel="stylesheet" href="js9/js9support.css">
     <link type="text/css" rel="stylesheet" href="js9/js9.css">
     <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
     <link rel="apple-touch-icon" href="/images/js9-apple-touch-icon.png">
-    <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/popper.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="js9/js9support.min.js"></script>
     <script type="text/javascript" src="js9/js9.min.js"></script>
     <script type="text/javascript" src="js9/js9plugins.js"></script>
@@ -42,8 +39,8 @@
         <div id="centerdiv">
             <div class="row justify-content-between">
                 <div class='col-10'>
-                    <form class="form-inline">
-                        <div class="form-group">
+                    <form class="d-flex align-items-center gap-2">
+                        <div class="mb-3">
                             <label for="filter">Filter:</label>
                             <select class="form-control form-control-sm" id="filter">
                                 {% for f in args['filters'] %}
@@ -77,8 +74,8 @@
             </div>
             <div class="row justify-content-left">
                 <div class='col align-self-left'>
-                    <form class="form-inline">
-                        <div class="form-group">
+                    <form class="d-flex align-items-center gap-2">
+                        <div class="mb-3">
                             <label class="form-check-label">
                                 Enable Cooling:
                                 {% if args['cooling'] == "On" %}
@@ -118,27 +115,26 @@
                 var y = 256.;
                 var radius = 20.;
                 function disable() {
-                    $('#connect').prop("disabled", true);
-                    $('#expose').prop("disabled", true);
-                    $('#cooling').prop("disabled", true);
-                    $('#conftemp').prop("disabled", true);
+                    document.getElementById('connect').disabled = true;
+                    document.getElementById('expose').disabled = true;
+                    document.getElementById('cooling').disabled = true;
+                    document.getElementById('conftemp').disabled = true;
                     busy = true;
                 };
                 function enable() {
-                    $('#connect').prop("disabled", false);
-                    $('#expose').prop("disabled", false);
-                    $('#cooling').prop("disabled", false);
-                    $('#conftemp').prop("disabled", false);
+                    document.getElementById('connect').disabled = false;
+                    document.getElementById('expose').disabled = false;
+                    document.getElementById('cooling').disabled = false;
+                    document.getElementById('conftemp').disabled = false;
                     busy = false;
                 }
-                $('#expose').on('click', function() {
+                document.getElementById('expose').addEventListener('click', function() {
                     disable();
-                    var exptype = $('#exptype').val();
-                    var exptime = $('#exptime').val();
-                    var filt = $('#filter').val();
+                    var exptype = document.getElementById('exptype').value;
+                    var exptime = document.getElementById('exptime').value;
+                    var filt = document.getElementById('filter').value;
                     var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
-                    $.get(url, function(data, status) {
-                        var logstuff = data + status;
+                    fetch(url).then(function() {
                         enable();
                     });
                     rarr = JS9.GetRegions();
@@ -163,47 +159,45 @@
                         };
                     }});
                 });
-                $('#cooling').on('click', function() {
+                document.getElementById('cooling').addEventListener('click', function() {
                     disable();
-                    $.get("cooling", function(data, status) {
+                    fetch("cooling").then(function() {
                         enable();
-                        var logstuff = data + status;
                     });
                 });
-                $('#conftemp').on('click', function(){
+                document.getElementById('conftemp').addEventListener('click', function(){
                     disable();
-                    var temp = $('#settemp').val();
+                    var temp = document.getElementById('settemp').value;
                     var url = "temperature?temp=" + temp;
-                    $.get(url, function(data, status) {
-                        var logstuff = data + status;
-                        $('#settemp').val(temp);
+                    fetch(url).then(function() {
+                        document.getElementById('settemp').value = temp;
                         enable();
                     });
                 });
-                $('#connect').on('click', function(){
+                document.getElementById('connect').addEventListener('click', function(){
                     disable();
-                    $.get("reset", function(data, status) {
-                        var logstuff = data + status;
+                    fetch("reset").then(function() {
                         enable();
                     });
                 });
 
                 (function update() {
-                    $.getJSON("status", {format: "json"}).done(function(data) {
+                    fetch("status?format=json").then(r => r.json()).then(function(data) {
                         if (busy == false) {
-                            $('#ctemp').html(data['temperature'] + " ˚C");
-                            $('#cpower').html(data['cooling_power'] + "%");
+                            document.getElementById('ctemp').innerHTML = data['temperature'] + " ˚C";
+                            document.getElementById('cpower').innerHTML = data['cooling_power'] + "%";
                             if (data['cooling'] == "On") {
-                                $('#cooling').prop('checked', true);
+                                document.getElementById('cooling').checked = true;
                             } else {
-                                $('#cooling').prop('checked', false);
+                                document.getElementById('cooling').checked = false;
                             };
+                            var connectBtn = document.getElementById('connect');
                             if (data['status'] == true) {
-                                $("#connect").removeClass("btn-danger");
-                                $("#connect").addClass("btn-success");
+                                connectBtn.classList.remove("btn-danger");
+                                connectBtn.classList.add("btn-success");
                             } else {
-                                $("#connect").removeClass("btn-success");
-                                $("#connect").addClass("btn-danger");
+                                connectBtn.classList.remove("btn-success");
+                                connectBtn.classList.add("btn-danger");
                             };
                         };
                         setTimeout(update, 5000);

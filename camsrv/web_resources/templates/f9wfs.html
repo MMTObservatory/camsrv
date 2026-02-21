@@ -7,11 +7,8 @@
     <link type="text/css" rel="stylesheet" href="js9/js9support.css">
     <link type="text/css" rel="stylesheet" href="js9/js9.css">
     <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
     <link rel="apple-touch-icon" href="/images/js9-apple-touch-icon.png">
-    <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/popper.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="js9/js9support.min.js"></script>
     <script type="text/javascript" src="js9/js9.min.js"></script>
     <script type="text/javascript" src="js9/js9plugins.js"></script>
@@ -121,50 +118,61 @@
                     enable(STATE_EXPOSING);
                     cmap = JS9.GetColormap();
                     JS9.CloseImage();
-                    
+
                     console.log("loading JS9")
                     JS9.Load(indi.CCD1, {onload: function() {
                             if (cmap != null) {
                                 JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
-                    
+
                             };
-                            $.get("/latest_image_name", function(data){
-                                    $("span#image_name").text(data)
-                                    $("#progress").text("Exposure Done!");
-                                    $("#progress").css("border", "5px solid #080")
-                                    $("#progress").removeClass("progress-bar-striped progress-bar-animated");
+                            fetch("/latest_image_name").then(r => r.text()).then(function(data){
+                                    document.querySelector("span#image_name").textContent = data;
+                                    var progress = document.getElementById("progress");
+                                    progress.textContent = "Exposure Done!";
+                                    progress.style.border = "5px solid #080";
+                                    progress.classList.remove("progress-bar-striped", "progress-bar-animated");
                                 })
                     }});
-                    $("#progress").css("width", "0%").text("");
-                    $("#progress").removeClass("progress-bar-striped progress-bar-animated");
-                    // if ($('#continuous').prop("checked")) {
-                    //    $('#expose').trigger('click');
+                    var progress = document.getElementById("progress");
+                    progress.style.width = "0%";
+                    progress.textContent = "";
+                    progress.classList.remove("progress-bar-striped", "progress-bar-animated");
+                    // if (document.getElementById('continuous').checked) {
+                    //    document.getElementById('expose').click();
                     // };
                 }
                 else if(indi.name === "CCD_EXPOSURE" && indi.op === IndiOp.SET)
                 {
-                    $("#progress").addClass("progress-bar-striped progress-bar-animated");
+                    var progress = document.getElementById("progress");
+                    progress.classList.add("progress-bar-striped", "progress-bar-animated");
                     percent = 100 * (1-indi.CCD_EXPOSURE_VALUE/EXPOSING_TIME)
-                    $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
+                    progress.style.width = percent.toString() + "%";
+                    progress.textContent = Math.round(percent).toString() + " %";
                     if (percent > 99)
                     {
-                        $("#progress").css("border", "5px solid #088")
-                        $("#progress").css("width", "100%").text("Reading Out...");
+                        progress.style.border = "5px solid #088";
+                        progress.style.width = "100%";
+                        progress.textContent = "Reading Out...";
                     }
                     else
                     {
-                        $("#progress").css("border", "none")
+                        progress.style.border = "none";
                     }
                 }
                 else if(indi.name === "CONNECTION" && indi.op === IndiOp.SET)
                 {
+                    var connectBtn = document.getElementById("connect");
                     if(indi.CONNECT == "On")
                     {
-                        $("#connect").text("Connected").removeClass("btn-danger").addClass("btn-success")
+                        connectBtn.textContent = "Connected";
+                        connectBtn.classList.remove("btn-danger");
+                        connectBtn.classList.add("btn-success");
                     }
                     else
                     {
-                        $("#connect").text("NOT Connected").addClass("btn-danger").removeClass("btn-success")
+                        connectBtn.textContent = "NOT Connected";
+                        connectBtn.classList.add("btn-danger");
+                        connectBtn.classList.remove("btn-success");
                     }
                 }
                 else if(indi.name === "CCD_COOLER" && indi.op === IndiOp.SET)
@@ -173,23 +181,23 @@
                     if(indi.COOLER_ON === "On")
                     {
                         F9_GLOBALS.COOLING = true;
-                        $("#cooling").prop("checked", true)
+                        document.getElementById("cooling").checked = true;
                     }
                     else
                     {
                         F9_GLOBALS.COOLING = false;
-                        $("#cooling").prop("checked", false)
+                        document.getElementById("cooling").checked = false;
                     }
                     enable(STATE_STARTING_COOL);
                 }
                 else if(indi.name === "CCD_TEMPERATURE" && indi.op === IndiOp.SET)
                 {
-                    $('#ctemp').html(indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C");
+                    document.getElementById('ctemp').innerHTML = indi.CCD_TEMPERATURE_VALUE.toFixed(1) + " ˚C";
                     enable(STATE_CFGING_TEMP);
                 }
                 else if(indi.name === "CCD_COOLER_POWER" && indi.op === IndiOp.SET)
                 {
-                    $('#cpower').html(indi.CCD_COOLER_VALUE.toFixed(1) + "%");
+                    document.getElementById('cpower').innerHTML = indi.CCD_COOLER_VALUE.toFixed(1) + "%";
 
                 }
                 else if(indi.name === "CCD_INFO" && indi.op === IndiOp.SET)
@@ -211,16 +219,16 @@
             <div class="card">
                 <div class="card-header" role="tab" id="eng_heading">
                     <h5 class="mb-0">
-                        <a class="collapsed" data-toggle="collapse" href="#collapse_reg" aria-expanded="false" aria-controls="collapse_reg">
+                        <a class="collapsed" data-bs-toggle="collapse" href="#collapse_reg" aria-expanded="false" aria-controls="collapse_reg">
                             Engineering Interface
                         </a>
                     </h5>
                 </div>
-                <div id="collapse_reg" class="collapse" role="tabpanel" aria-labelledby="eng_heading" data-parent="#accordion">
+                <div id="collapse_reg" class="collapse" role="tabpanel" aria-labelledby="eng_heading" data-bs-parent="#accordion">
                     <div class="card-body">
                         <form>
                             <div class="form-row">
-                                <div class='form-group col-md-4'>
+                                <div class='mb-3 col-md-4'>
                                     <button type="button" id="confwfs" class="btn btn-primary btn-sm">Configure for WFS</button>
                                 </div>
                             
@@ -248,15 +256,15 @@
         </div>
         <div class="row justify-content-left">
             <div class='col-md-10 align-self-left'>
-                <form class="form-inline">
-                    <div class="form-row form-group">
-                        <div class="custom-control custom-radio custom-control-inline">
+                <form class="d-flex align-items-center gap-2">
+                    <div class="form-row mb-3">
+                        <div class="form-check form-check-inline">
                             {% if args['cooling'] == "On" %}
-                                <input id="cooling" type="checkbox" class="custom-control-input" checked>
+                                <input id="cooling" type="checkbox" class="form-check-input" checked>
                             {% else %}
-                                <input id="cooling" type="checkbox" class="custom-control-input">
+                                <input id="cooling" type="checkbox" class="form-check-input">
                             {% end %}
-                            <label class="custom-control-label" for="cooling">Enable Cooling</label>
+                            <label class="form-check-label" for="cooling">Enable Cooling</label>
                         </div>
                         <label for="settemp">Set Temp (˚C):</label>
                         <input class="form-control form-control-sm" type="number" min=-30.0 max=30.0 step=0.1 value={{ args['requested_temp'] }} id="settemp">
@@ -268,7 +276,7 @@
         <div class="row justify-content-left">
             <div class='col-md-10 align-self-left'>
 
-                <div class="form-inline">
+                <div class="d-flex align-items-center gap-2">
                     <label for="ctemp"><b>Camera Temp:</b></label> <div id="ctemp">N/A ˚C</div>
                     <label for="cpower"><b>Cooling Power:</b></label> <div id="cpower">N/A%</div>
                 </div>
@@ -276,15 +284,15 @@
         </div>
         <div class="row justify-content-between">
             <div class='col-md-10'>
-                <form class="form-inline">
-                    <div class="form-group">
+                <form class="d-flex align-items-center gap-2">
+                    <div class="mb-3">
                         <label for="exptype">Exposure Type:</label>
               
                         <label for="exptime">Exposure Time (sec):</label>
                         <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=1.0 value=10.0 id="exptime">
                         <button type="button" id="expose" class="btn btn-primary">Expose</button>
-                        <!-- <label class="form-check-label"><label class="custom-control custom-checkbox">
-                            <input id="continuous" type="checkbox" class="custom-control-input">
+                        <!-- <label class="form-check-label"><label class="form-check">
+                            <input id="continuous" type="checkbox" class="form-check-input">
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Continuous Exposure Loop</span>
                         </label> -->
@@ -313,13 +321,13 @@
 
             function disable(STATE) {
                 BUSY_STATUS = BUSY_STATUS | STATE
-                $('#connect').prop("disabled", true);
-                $('#expose').prop("disabled", true);
-                $('#cooling').prop("disabled", true);
-                $('#conftemp').prop("disabled", true);
-                $('#confccd').prop("disabled", true);
-                $('#confwfs').prop("disabled", true);
-                $('#confdefault').prop("disabled", true);
+                document.getElementById('connect').disabled = true;
+                document.getElementById('expose').disabled = true;
+                document.getElementById('cooling').disabled = true;
+                document.getElementById('conftemp').disabled = true;
+                document.getElementById('confccd') && (document.getElementById('confccd').disabled = true);
+                document.getElementById('confwfs').disabled = true;
+                document.getElementById('confdefault') && (document.getElementById('confdefault').disabled = true);
                 busy = true;
             };
             function enable(STATE) {
@@ -327,30 +335,33 @@
                 //Only enable if all status bits are zero.
                 if ( BUSY_STATUS === 0x00 )
                 {
-                    $('#connect').prop("disabled", false);
-                    $('#expose').prop("disabled", false);
-                    $('#cooling').prop("disabled", false);
-                    $('#conftemp').prop("disabled", false);
-                    $('#confccd').prop("disabled", false);
-                    $('#confwfs').prop("disabled", false);
-                    $('#confdefault').prop("disabled", false);
+                    document.getElementById('connect').disabled = false;
+                    document.getElementById('expose').disabled = false;
+                    document.getElementById('cooling').disabled = false;
+                    document.getElementById('conftemp').disabled = false;
+                    document.getElementById('confccd') && (document.getElementById('confccd').disabled = false);
+                    document.getElementById('confwfs').disabled = false;
+                    document.getElementById('confdefault') && (document.getElementById('confdefault').disabled = false);
                     busy = false;
                 }
             };
 
             function updateProgress(exp, i) {
+                var progress = document.getElementById("progress");
                 if (i > 0) {
                     percent = 100.0 * (exp - i) / exp
-                    $("#progress").css("width", percent.toString() + "%").text(Math.round(percent).toString() + " %");
+                    progress.style.width = percent.toString() + "%";
+                    progress.textContent = Math.round(percent).toString() + " %";
                     i = i - 0.1;
                     setTimeout(function() {updateProgress(exp, i)}, 100);
                 } else {
-                    $("#progress").css("width", "100%").text("Reading Out...");
-                    $("#progress").addClass("progress-bar-striped progress-bar-animated");
+                    progress.style.width = "100%";
+                    progress.textContent = "Reading Out...";
+                    progress.classList.add("progress-bar-striped", "progress-bar-animated");
                 };
             };
-            $('#cooling').on('click', function() {
-                //let cooling_state = $("#cooling").prop("checked");
+            document.getElementById('cooling').addEventListener('click', function() {
+                //let cooling_state = document.getElementById("cooling").checked;
                 //For some reason checking the state of the
                 // radio button does not always return the correct sate
                 //!!!!????
@@ -362,31 +373,30 @@
                 }
                 else
                 {
-                    let temp = $("#settemp").val();
+                    let temp = document.getElementById("settemp").value;
                     setindi("Switch", "SBIG CCD.CCD_COOLER", "COOLER_ON", "On", "COOLER_OFF", "Off");
                     setindi("Number", "SBIG CCD.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
                 }
                 disable(STATE_STARTING_COOL);
 
             });
-            $('#expose').on('click', function() {
+            document.getElementById('expose').addEventListener('click', function() {
                 disable(STATE_EXPOSING);
-                var exptype = $('#exptype').val();
-                var exptime = $('#exptime').val();
-                var filt = $('#filter').val();
+                var exptype = document.getElementById('exptype').value;
+                var exptime = document.getElementById('exptime').value;
+                var filt = document.getElementById('filter') ? document.getElementById('filter').value : '';
 	        	EXPOSING_TIME=parseFloat(exptime);
         		setindi("Number", "SBIG CCD.CCD_EXPOSURE", "CCD_EXPOSURE_VALUE", exptime)
                 var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
 
             });
-/*            $('#expose').on('click', function() {
+/*            document.getElementById('expose').addEventListener('click', function() {
                 disable();
-                var exptype = $('#exptype').val();
-                var exptime = $('#exptime').val();
-                var filt = $('#filter').val();
+                var exptype = document.getElementById('exptype').value;
+                var exptime = document.getElementById('exptime').value;
+                var filt = document.getElementById('filter').value;
                 var url = "expose?filt=" + filt + "&exptype=" + exptype + "&exptime=" + exptime;
-                $.get(url, function(data, status) {
-                    var logstuff = data + status;
+                fetch(url).then(function() {
                     enable();
                     cmap = JS9.GetColormap();
                     JS9.CloseImage();
@@ -395,10 +405,12 @@
                             JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
                         };
                     }});
-                    $("#progress").css("width", "0%").text("");
-                    $("#progress").removeClass("progress-bar-striped progress-bar-animated");
-                    // if ($('#continuous').prop("checked")) {
-                    //    $('#expose').trigger('click');
+                    var progress = document.getElementById("progress");
+                    progress.style.width = "0%";
+                    progress.textContent = "";
+                    progress.classList.remove("progress-bar-striped", "progress-bar-animated");
+                    // if (document.getElementById('continuous').checked) {
+                    //    document.getElementById('expose').click();
                     // };
                 });
                 var i = parseFloat(exptime);
@@ -406,47 +418,45 @@
                 updateProgress(exp, i);
             });
 
-            $('#cooling').on('click', function() {
+            document.getElementById('cooling').addEventListener('click', function() {
                 disable();
-                $.get("cooling", function(data, status) {
+                fetch("cooling").then(function() {
                     enable();
-                    var logstuff = data + status;
                 });
             });
-            $('#conftemp').on('click', function(){
+            document.getElementById('conftemp').addEventListener('click', function(){
                 disable();
-                var temp = $('#settemp').val();
+                var temp = document.getElementById('settemp').value;
                 var url = "temperature?temp=" + temp;
-                $.get(url, function(data, status) {
-                    var logstuff = data + status;
+                fetch(url).then(function() {
                     enable();
                 });
             });
-            $('#confccd').on('click', function(){
+            document.getElementById('confccd').addEventListener('click', function(){
                 disable();
-                var frame_x = $('#frame_x').val();
-                var frame_y = $('#frame_y').val();
-                var frame_w = $('#frame_w').val();
-                var frame_h = $('#frame_h').val();
-                var x_bin = $('#x_bin').val();
-                var y_bin = $('#y_bin').val();
+                var frame_x = document.getElementById('frame_x').value;
+                var frame_y = document.getElementById('frame_y').value;
+                var frame_w = document.getElementById('frame_w').value;
+                var frame_h = document.getElementById('frame_h').value;
+                var x_bin = document.getElementById('x_bin').value;
+                var y_bin = document.getElementById('y_bin').value;
                 var url = "ccdconf?frame_x=" + frame_x;
                 url += "&frame_y=" + frame_y;
                 url += "&frame_w=" + frame_w;
                 url += "&frame_h=" + frame_h;
                 url += "&x_bin=" + x_bin;
                 url += "&y_bin=" + y_bin;
-                $.get(url, function(data, status) {
+                fetch(url).then(function() {
                     enable();
                 });
             });
 */
-            $('#conftemp').on('click', function(){
-               let temp = $('#settemp').val()
+            document.getElementById('conftemp').addEventListener('click', function(){
+               let temp = document.getElementById('settemp').value;
                 setindi("Number", "SBIG CCD.CCD_TEMPERATURE", "CCD_TEMPERATURE_VALUE", temp)
-              
+
             });
-            $('#confwfs').on('click', function(){
+            document.getElementById('confwfs').addEventListener('click', function(){
                 disable(STATE_FRAMING);
                 let diff = F9_GLOBALS.CCD_INFO.CCD_MAX_X - F9_GLOBALS.CCD_INFO.CCD_MAX_Y
                 let X = parseInt(diff/6);
@@ -460,7 +470,7 @@
                     "WIDTH",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y,
                     "HEIGHT",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y
                 )
-                setindi("Number", "SBIG CCD.CCD_BINNING", 
+                setindi("Number", "SBIG CCD.CCD_BINNING",
                     "HOR_BIN", BINNING_X,
                     "VER_BIN", BINNING_Y,
                 );
@@ -468,46 +478,47 @@
                     "X", X,
                     "Y", Y,
                     "WIDTH",  F9_GLOBALS.CCD_INFO.CCD_MAX_Y,
-                    "HEIGHT", F9_GLOBALS.CCD_INFO.CCD_MAX_Y 
+                    "HEIGHT", F9_GLOBALS.CCD_INFO.CCD_MAX_Y
                 );
             });
-/*            $('#confdefault').on('click', function(){
+/*            document.getElementById('confdefault').addEventListener('click', function(){
                 disable();
-                $.get("default_config", function(){
+                fetch("default_config").then(function() {
                     enable();
                 });
             });
 */
 
-            $('#connect').on('click', function(){
+            document.getElementById('connect').addEventListener('click', function(){
                 setindi("Switch", "SBIG CCD.CONNECTION", "CONNECT", "On", "DISCONNECT", "Off");
             });
             (function update() {
                 return
-                $.getJSON("status", {format: "json"}).done(function(data) {
+                fetch("status?format=json").then(r => r.json()).then(function(data) {
                     if (busy == false) {
-                        $('#ctemp').html(data['temperature'] + " ˚C");
-                        $('#cpower').html(data['cooling_power'] + "%");
+                        document.getElementById('ctemp').innerHTML = data['temperature'] + " ˚C";
+                        document.getElementById('cpower').innerHTML = data['cooling_power'] + "%";
                         if (data['cooling'] == "On") {
-                            $('#cooling').prop('checked', true);
+                            document.getElementById('cooling').checked = true;
                         } else {
-                            $('#cooling').prop('checked', false);
+                            document.getElementById('cooling').checked = false;
                         };
+                        var connectBtn = document.getElementById('connect');
                         if (data['status'] == true) {
-                            $("#connect").removeClass("btn-danger");
-                            $("#connect").addClass("btn-success");
-                            $("#connect").text("Connected");
+                            connectBtn.classList.remove("btn-danger");
+                            connectBtn.classList.add("btn-success");
+                            connectBtn.textContent = "Connected";
                         } else {
-                            $("#connect").removeClass("btn-success");
-                            $("#connect").addClass("btn-danger");
-                            $("#connect").text("NOT Connected");
+                            connectBtn.classList.remove("btn-success");
+                            connectBtn.classList.add("btn-danger");
+                            connectBtn.textContent = "NOT Connected";
                         };
-                        $('#cframe_x').html(data['frame']['X']);
-                        $('#cframe_y').html(data['frame']['Y']);
-                        $('#cframe_w').html(data['frame']['width']);
-                        $('#cframe_h').html(data['frame']['height']);
-                        $('#cx_bin').html(data['binning']['X']);
-                        $('#cy_bin').html(data['binning']['Y']);
+                        document.getElementById('cframe_x').innerHTML = data['frame']['X'];
+                        document.getElementById('cframe_y').innerHTML = data['frame']['Y'];
+                        document.getElementById('cframe_w').innerHTML = data['frame']['width'];
+                        document.getElementById('cframe_h').innerHTML = data['frame']['height'];
+                        document.getElementById('cx_bin').innerHTML = data['binning']['X'];
+                        document.getElementById('cy_bin').innerHTML = data['binning']['Y'];
                     };
                     setTimeout(update, 2000);
                 });
