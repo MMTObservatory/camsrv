@@ -24,6 +24,7 @@ test = [
     "tox",
     "coverage",
     "pytest",
+    "pytest-cov",
     "black",
     "flake8",
 ]
