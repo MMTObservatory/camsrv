@@ -7,11 +7,8 @@
     <link type="text/css" rel="stylesheet" href="js9/js9support.css">
     <link type="text/css" rel="stylesheet" href="js9/js9.css">
     <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <link type="text/css" rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
     <link rel="apple-touch-icon" href="/images/js9-apple-touch-icon.png">
-    <script type="text/javascript" src="bootstrap/js/jquery.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/popper.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="js9/js9support.min.js"></script>
     <script type="text/javascript" src="js9/js9.min.js"></script>
     <script type="text/javascript" src="js9/js9plugins.js"></script>
@@ -42,8 +39,8 @@
         <div id="centerdiv">
             <div class="row justify-content-between">
                 <div class='col-10'>
-                    <form class="form-inline">
-                        <div class="form-group">
+                    <form class="d-flex align-items-center gap-2">
+                        <div class="mb-3">
                             <label for="exptype">Exposure Type:</label>
                             <select class="form-control form-control-sm" id="exptype">
                                 {% for f in args['frame_types'] %}
@@ -71,20 +68,19 @@
                 var y = 256.;
                 var radius = 20.;
                 function disable() {
-                    $('#expose').prop("disabled", true);
+                    document.getElementById('expose').disabled = true;
                     busy = true;
                 };
                 function enable() {
-                    $('#expose').prop("disabled", false);
+                    document.getElementById('expose').disabled = false;
                     busy = false;
                 }
-                $('#expose').on('click', function() {
+                document.getElementById('expose').addEventListener('click', function() {
                     disable();
-                    var exptype = $('#exptype').val();
-                    var exptime = $('#exptime').val();
+                    var exptype = document.getElementById('exptype').value;
+                    var exptime = document.getElementById('exptime').value;
                     var url = "expose?exptype=" + exptype + "&exptime=" + exptime;
-                    $.get(url, function(data, status) {
-                        var logstuff = data + status;
+                    fetch(url).then(function() {
                         enable();
                     });
                     rarr = JS9.GetRegions();
