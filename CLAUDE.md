@@ -21,7 +21,7 @@ pytest camsrv/tests docs
 pytest camsrv/tests/test_apps.py::TestSimSrv::test_homepage
 
 # Code style (135 char max line length)
-flake8 camsrv --count --max-line-length=135
+flake8 camsrv --count --max-line-length=135 --extend-ignore=E203
 
 # Via tox
 tox -e codestyle
