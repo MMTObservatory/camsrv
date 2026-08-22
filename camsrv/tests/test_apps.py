@@ -2,6 +2,8 @@
 Sanity checks to make sure applications can be instantiated
 """
 
+import json
+
 from tornado.testing import AsyncHTTPTestCase, gen_test
 
 from ..camsrv import CAMsrv
@@ -18,6 +20,24 @@ class TestSimSrv(AsyncHTTPTestCase):
     @gen_test
     def test_homepage(self):
         response = yield self.http_client.fetch(self.get_url("/"))
+        self.assertEqual(response.code, 200)
+
+    def test_status_with_no_camera(self):
+        """
+        /status must still return the default JSON when no camera is attached.
+        """
+        response = self.fetch("/status")
+        self.assertEqual(response.code, 200)
+        status = json.loads(response.body)
+        self.assertFalse(status["status"])
+        self.assertEqual(status["temperature"], "N/A")
+
+    def test_disconnect_with_no_camera(self):
+        """
+        /disconnect must be a no-op rather than an error when no camera is
+        attached.
+        """
+        response = self.fetch("/disconnect")
         self.assertEqual(response.code, 200)
 
 

@@ -32,6 +32,9 @@
         div.pyindi {
       display: none
       }
+      span#image_name{
+        padding-left:10px;
+      }
       #centerdiv {
           position: absolute;
           margin: auto;
@@ -286,8 +289,6 @@
             <div class='col-md-10'>
                 <form class="d-flex align-items-center gap-2">
                     <div class="mb-3">
-                        <label for="exptype">Exposure Type:</label>
-              
                         <label for="exptime">Exposure Time (sec):</label>
                         <input class="form-control form-control-sm" type="number" min=0.0 max=3600.0 step=1.0 value=10.0 id="exptime">
                         <button type="button" id="expose" class="btn btn-primary">Expose</button>
@@ -296,6 +297,8 @@
                             <span class="custom-control-indicator"></span>
                             <span class="custom-control-description">Continuous Exposure Loop</span>
                         </label> -->
+
+                        <span id="image_name"></span>
                     </div>
                 </form>
             </div>
@@ -382,7 +385,8 @@
             });
             document.getElementById('expose').addEventListener('click', function() {
                 disable(STATE_EXPOSING);
-                var exptype = document.getElementById('exptype').value;
+                // the operational interface has no exposure type selector, so default to Light
+                var exptype = document.getElementById('exptype') ? document.getElementById('exptype').value : 'Light';
                 var exptime = document.getElementById('exptime').value;
                 var filt = document.getElementById('filter') ? document.getElementById('filter').value : '';
 	        	EXPOSING_TIME=parseFloat(exptime);

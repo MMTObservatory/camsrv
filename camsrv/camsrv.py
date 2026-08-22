@@ -197,9 +197,13 @@ class CAMsrv(tornado.web.Application):
         """
 
         def get(self):
-            self.application.camera.quit()
-            self.application.camera = None
-            log.info("Disconnected camera from INDI server.")
+            cam = self.application.camera
+            if cam is not None:
+                cam.quit()
+                self.application.camera = None
+                log.info("Disconnected camera from INDI server.")
+            else:
+                log.warning("Camera not connected.")
             self.finish()
 
     class TemperatureHandler(tornado.web.RequestHandler):
@@ -259,7 +263,8 @@ class CAMsrv(tornado.web.Application):
             }
 
             if cam is None:
-                return status
+                self.write(json.dumps(status))
+                return
 
             # make sure we can connect to camera and bail early if we can't
             if cam is not None:
