@@ -71,8 +71,9 @@
         * Runs on load. Builds the default properties using a callback.
         */
         const main = () => {
-            // hot pixels blow out a linear stretch, so display new images with zscale
-            JS9.imageOpts.scale = "zscale";
+            // hot pixels blow out the full data range, so clip new images with zscale.
+            // this is the clipping mode, not the scale function, which stays linear.
+            JS9.imageOpts.scaleclipping = "zscale";
 
             // Tornado way of getting list
             var devices =['*'];
@@ -133,7 +134,15 @@
 
                             };
                             if (scale != null) {
-                                JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
+                                JS9.SetScale(scale['scale']);
+                                if (scale['scaleclipping'] === 'user') {
+                                    // hand-tuned cut levels, so carry them over as-is
+                                    JS9.SetScale(scale['scalemin'], scale['scalemax']);
+                                } else {
+                                    // recompute the limits for this image rather than
+                                    // reusing the previous exposure's
+                                    JS9.SetScale(scale['scaleclipping']);
+                                };
                             };
                             fetch("/latest_image_name").then(r => r.text()).then(function(data){
                                     document.querySelector("span#image_name").textContent = data;
