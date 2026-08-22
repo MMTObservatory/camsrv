@@ -71,6 +71,9 @@
         * Runs on load. Builds the default properties using a callback.
         */
         const main = () => {
+            // hot pixels blow out a linear stretch, so display new images with zscale
+            JS9.imageOpts.scale = "zscale";
+
             // Tornado way of getting list
             var devices =['*'];
             initialize(devices, customGui=false);
@@ -120,6 +123,7 @@
                 {
                     enable(STATE_EXPOSING);
                     cmap = JS9.GetColormap();
+                    scale = JS9.GetScale();
                     JS9.CloseImage();
 
                     console.log("loading JS9")
@@ -127,6 +131,9 @@
                             if (cmap != null) {
                                 JS9.SetColormap(cmap['colormap'], cmap['contrast'], cmap['bias']);
 
+                            };
+                            if (scale != null) {
+                                JS9.SetScale(scale['scale'], scale['scalemin'], scale['scalemax']);
                             };
                             fetch("/latest_image_name").then(r => r.text()).then(function(data){
                                     document.querySelector("span#image_name").textContent = data;
